@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestion du Patrimoine - INFPE</title>
+<!-- Librairie Supabase version UMD stable -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<!-- Librairie Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root { --primary: #1e3a8a; --primary-light: #3b82f6; --danger: #ef4444; --success: #10b981; --warning: #f59e0b; --info: #06b6d4; --bg: #f0f4f8; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; background: var(--bg); color: #1a202c; }
+[data-tooltip] { position: relative; cursor: help; }
+[data-tooltip]:hover::after { content: attr(data-tooltip); position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1e3a8a; color: white; padding: 8px 12px; border-radius: 6px; font-size: 13px; white-space: normal; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none; max-width: 320px; text-align: center; line-height: 1.4; }
+[data-tooltip]:hover::before { content: ''; position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #1e3a8a; z-index: 10000; pointer-events: none; }
+#loginScreen { position: fixed; inset: 0; background: linear-gradient(135deg, #1e3a8a, #3b82f6); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 380px; }
+.login-box h2 { color: var(--primary); margin-bottom: 20px; text-align: center; font-size: 18px; }
+.login-box input { width: 100%; padding: 10px; margin: 8px 0; border: 2px solid var(--primary); border-radius: 4px; font-size: 12px; }
+.login-box button { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+.login-box button:hover { background: var(--primary-light); }
+#appHeader { background: var(--primary); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+#appHeader h1 { font-size: 16px; }
+#appHeader .user-info { display: flex; gap: 10px; align-items: center; }
+#appHeader button { background: var(--primary-light); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+#appHeader button:hover { background: #2563eb; }
+#tabsContainer { background: white; border-bottom: 2px solid var(--primary); display: flex; flex-wrap: wrap; padding: 0 10px; overflow-x: auto; }
+.tab-btn { padding: 10px 14px; background: transparent; border: none; cursor: pointer; font-size: 12px; color: var(--primary); border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s; }
+.tab-btn:hover { background: #e0e7ff; }
+.tab-btn.active { background: var(--primary); color: white; border-bottom: 3px solid var(--warning); font-weight: bold; }
+#contentArea { padding: 15px; height: calc(100vh - 110px); overflow: auto; position: relative; border-top: 4px solid transparent; }
+@keyframes slideRight { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideLeft { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes zoomOut { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes zoomIn { from { transform: scale(2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.anim-slideRight { animation: slideRight 0.4s ease; }
+.anim-slideLeft { animation: slideLeft 0.4s ease; }
+.anim-slideDown { animation: slideDown 0.4s ease; }
+.anim-slideUp { animation: slideUp 0.4s ease; }
+.anim-zoomOut { animation: zoomOut 0.4s ease; }
+.anim-zoomIn { animation: zoomIn 0.4s ease; }
+@keyframes deleteRow { 0% { background-color: #fee2e2; opacity: 1; transform: translateX(0); } 50% { background-color: #fecaca; opacity: 0.7; transform: translateX(-20px); } 100% { background-color: transparent; opacity: 0; transform: translateX(-100%); height: 0; padding: 0; margin: 0; } }
+.row-deleting { animation: deleteRow 0.6s ease forwards; overflow: hidden; }
+table.patrimoine-table { width: 100%; border-collapse: collapse; background: white; font-size: 12px; border: 2px solid red; }
+table.patrimoine-table thead { position: sticky; top: 0; background: var(--primary); color: white; z-index: 5; }
+table.patrimoine-table th { padding: 8px; border: 1px solid black; text-align: left; font-weight: bold; font-size: 12px; }
+table.patrimoine-table td { padding: 6px 8px; border: 1px solid black; font-size: 12px; transition: all 0.3s; }
+table.patrimoine-table tr:nth-child(even) { background: #f9fafb; }
+table.patrimoine-table tr:hover { background: #dbeafe; }
+.table-wrapper { max-height: calc(100vh - 300px); overflow: auto; border: 2px solid red; }
+.btn { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; margin: 1px; color: white; }
+.btn-edit { background: var(--warning); color: #1a202c; }
+.btn-delete { background: var(--danger); }
+.btn-reforme { background: #8b5cf6; }
+.btn-primary { background: var(--primary); padding: 8px 16px; }
+.btn-success { background: var(--success); padding: 8px 16px; }
+.btn-info { background: var(--info); padding: 8px 16px; }
+.btn:hover { opacity: 0.85; }
+.search-bar { display: flex; gap: 10px; flex-wrap: wrap; padding: 10px; background: white; border: 2px solid red; border-radius: 4px; margin-bottom: 10px; }
+.search-bar input, .search-bar select { padding: 6px; border: 2px solid var(--primary); border-radius: 4px; font-size: 12px; }
+.search-count { padding: 6px 12px; background: var(--success); color: white; border-radius: 4px; font-weight: bold; font-size: 12px; }
+.sub-tabs { display: flex; gap: 2px; margin-bottom: 10px; border-bottom: 2px solid var(--primary); flex-wrap: wrap; }
+.sub-tab-btn { padding: 8px 14px; background: #e0e7ff; border: none; cursor: pointer; font-size: 12px; color: var(--primary); border-radius: 4px 4px 0 0; }
+.sub-tab-btn.active { background: var(--primary); color: white; font-weight: bold; }
+.sub-content { display: none; }
+.sub-content.active { display: block; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.modal-overlay.show { display: flex; }
+.modal { background: white; border-radius: 8px; min-width: 600px; max-width: 95vw; max-height: 90vh; overflow: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.4); position: absolute; }
+.modal-header { background: var(--primary); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; cursor: move; user-select: none; }
+.modal-header h3 { font-size: 14px; }
+.modal-close { background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; }
+.modal-body { padding: 20px; font-size: 12px; }
+.form-line { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
+@media (max-width: 900px) { .form-line { grid-template-columns: repeat(2, 1fr); } }
+.modal-body label { display: block; margin-top: 10px; color: var(--primary); font-weight: bold; font-size: 12px; }
+.modal-body input, .modal-body select, .modal-body textarea { width: 100%; padding: 8px; margin-top: 4px; border: 2px solid var(--primary); border-radius: 4px; font-size: 12px; background: white; }
+.modal-body input:focus, .modal-body select:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+.modal-footer { padding: 15px 20px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 10px; }
+.checkbox-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+.checkbox-grid label { display: flex; align-items: center; gap: 5px; padding: 6px 10px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.checkbox-grid input[type="checkbox"] { width: auto; margin: 0; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.stat-card { background: white; padding: 20px; border-radius: 8px; border: 2px solid red; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.stat-card h4 { color: var(--primary); font-size: 13px; margin-bottom: 10px; }
+.stat-card .value { font-size: 28px; font-weight: bold; color: var(--primary); }
+.chart-container { background: white; padding: 20px; border-radius: 8px; border: 2px solid red; margin-top: 15px; }
+.logo-display { max-width: 150px; max-height: 80px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 200px; padding: 10px; border: 1px solid #e5e7eb; }
+.bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; min-width: 30px; }
+.bar-fill { width: 100%; background: linear-gradient(to top, #1e3a8a, #3b82f6); transition: height 1.5s ease-out; border-radius: 3px 3px 0 0; }
+.bar-label { font-size: 10px; margin-top: 4px; text-align: center; word-break: break-word; }
+.bar-value { font-size: 10px; font-weight: bold; color: var(--primary); }
+.confrontation-section { background: white; border: 2px solid var(--primary); border-radius: 8px; padding: 15px; margin: 15px 0; }
+.confrontation-section h4 { margin-bottom: 10px; font-size: 14px; }
+.section-manquants { border-color: var(--danger); }
+.section-manquants h4 { color: var(--danger); }
+.section-existants { border-color: var(--success); }
+.section-existants h4 { color: var(--success); }
+.section-saisies { border-color: var(--info); }
+.section-saisies h4 { color: var(--info); }
+.section-synthese { border-color: var(--primary); }
+.section-synthese h4 { color: var(--primary); }
+.badge-count { display: inline-block; padding: 4px 12px; border-radius: 12px; font-weight: bold; font-size: 14px; margin-left: 10px; }
+.badge-manquant { background: #fee2e2; color: var(--danger); }
+.badge-existant { background: #d1fae5; color: var(--success); }
+.badge-saisie { background: #cffafe; color: var(--info); }
+.item-list { max-height: 300px; overflow: auto; margin-top: 10px; }
+.item-row { padding: 6px 10px; border-bottom: 1px solid #e5e7eb; font-size: 11px; display: flex; justify-content: space-between; }
+.item-row:nth-child(even) { background: #f9fafb; }
+.item-row:hover { background: #dbeafe; }
+.item-code { font-family: monospace; font-weight: bold; color: var(--primary); }
+.item-designation { flex: 1; margin: 0 10px; }
+.item-etat { font-weight: bold; }
+.supabase-config { background: #eff6ff; border: 2px solid var(--primary-light); border-radius: 8px; padding: 15px; margin: 10px 0; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 10px; }
+.status-connected { background: var(--success); color: white; }
+.status-disconnected { background: var(--danger); color: white; }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <h2> INFPE - Gestion du Patrimoine</h2>
+    <input type="text" id="loginUser" placeholder="Nom d'utilisateur" autocomplete="off" data-tooltip="Saisissez votre nom d'utilisateur">
+    <input type="password" id="loginPass" placeholder="Mot de passe" data-tooltip="Saisissez votre mot de passe">
+    <button onclick="doLogin()" data-tooltip="Cliquez pour vous connecter au système">Se connecter</button>
+    <p id="loginError" style="color:red; margin-top:10px; text-align:center; font-size:12px;"></p>
+  </div>
+</div>
+
+<div id="app" style="display:none;">
+  <div id="appHeader">
+    <h1 data-tooltip="Système de Gestion du Patrimoine de l'INFPE">🏛️ INFPE - Gestion du Patrimoine</h1>
+    <div class="user-info">
+      <span id="currentUserDisplay" data-tooltip="Utilisateur actuellement connecté"></span>
+      <span id="supabaseStatus" data-tooltip="État de la connexion au cloud Supabase"></span>
+      <button onclick="openModal('passwordModal')" data-tooltip="Modifier votre mot de passe personnel">🔑 Mot de passe</button>
+      <button onclick="openModal('cloudModal')" data-tooltip="Configurer la synchronisation cloud">☁️ Synchronisation</button>
+      <button onclick="doLogout()" data-tooltip="Quitter votre session">🚪 Déconnexion</button>
+    </div>
+  </div>
+  <div id="tabsContainer"></div>
+  <div id="contentArea"></div>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="addBienModal">
+  <div class="modal" style="width:950px;">
+    <div class="modal-header"><h3>➕ Ajouter un nouveau bien</h3><button class="modal-close" onclick="closeModal('addBienModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-line">
+        <div><label>Code matière</label><input type="text" id="newCodeMat" maxlength="6" oninput="onCodeMatInput()"></div>
+        <div><label>Désignation</label><input type="text" id="newDesignation" readonly style="background:#f3f4f6;"></div>
+        <div><label>Type/Modèle</label><input type="text" id="newType" list="listType"><datalist id="listType"></datalist></div>
+        <div><label>Quantité</label><input type="text" id="newQte" value="1" readonly style="background:#f3f4f6;" tabindex="-1"></div>
+      </div>
+      <div class="form-line">
+        <div><label>État</label><select id="newEtat"><option value="">-- Sélectionner --</option><option>Bon</option><option>Passable</option><option>En panne</option><option>Mauvais</option><option>Perdu</option></select></div>
+        <div><label>Format</label><input type="text" id="newFormat" list="listFormat"><datalist id="listFormat"><option>Standard</option><option>Grand</option><option>Moyen</option><option>Petit</option></datalist></div>
+        <div><label>Année</label><input type="text" id="newAnnee" maxlength="4" oninput="onAnneeInput()"></div>
+        <div><label>Numéro</label><input type="text" id="newNumero" maxlength="4" oninput="onNumeroInput()"></div>
+      </div>
+      <div class="form-line">
+        <div><label>Bureau/Service</label><input type="text" id="newBureau" list="listBureau"><datalist id="listBureau"></datalist></div>
+        <div><label>Utilisateur</label><input type="text" id="newUtilisateur" list="listUtilisateur"><datalist id="listUtilisateur"></datalist></div>
+        <div><label>Direction</label><select id="newDirection"></select></div>
+        <div><label>Date d'inventaire</label><input type="date" id="newDateInv"></div>
+      </div>
+      <div style="margin-top:15px; padding:15px; background:#eff6ff; border:2px solid var(--primary); border-radius:6px;">
+        <b style="display:block; margin-bottom:10px; color:var(--primary);">📋 Aperçu du code matière généré :</b>
+        <div id="codePreview" style="font-size:14px; color:var(--primary); font-family:monospace; background:white; padding:8px; border-radius:4px; border:1px solid #bfdbfe;">—</div>
+      </div>
+      <div style="margin-top:15px; padding:15px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px;">
+        <b style="display:block; margin-bottom:10px; color:#334155;">Conserver les valeurs après enregistrement :</b>
+        <div class="checkbox-grid">
+          <label><input type="checkbox" id="keepDesignation"> Désignation</label>
+          <label><input type="checkbox" id="keepEtat"> État</label>
+          <label><input type="checkbox" id="keepFormat"> Format</label>
+          <label><input type="checkbox" id="keepAnnee"> Année</label>
+          <label><input type="checkbox" id="keepBureau"> Service/Bureau</label>
+          <label><input type="checkbox" id="keepUtilisateur"> Utilisateur</label>
+          <label style="background:#fee2e2; border-color:#ef4444; color:#991b1b;"><input type="checkbox" id="freeCodeMat"> Libre</label>
+        </div>
+      </div>
+      <div id="duplicateWarning" style="display:none; margin-top:15px; padding:10px; background:#fee2e2; border:2px solid var(--danger); border-radius:6px;">
+        ⚠️ <b>Code matière déjà existant !</b>
+        <button class="btn btn-edit" onclick="forceSaveDuplicate()" style="margin-left:10px;">Enregistrer quand même (Bis)</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveNewBien()">💾 Enregistrer</button>
+      <button class="btn" style="background:#6b7280; color:white;" onclick="closeModal('addBienModal')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editBienModal">
+  <div class="modal" style="width:700px;">
+    <div class="modal-header"><h3>✏️ Modifier le bien</h3><button class="modal-close" onclick="closeModal('editBienModal')">×</button></div>
+    <div class="modal-body" id="editBienBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveEditBien()">💾 Enregistrer</button>
+      <button class="btn" style="background:#6b7280; color:white;" onclick="closeModal('editBienModal')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="passwordModal">
+  <div class="modal" style="width:400px;">
+    <div class="modal-header"><h3>🔑 Changer le mot de passe</h3><button class="modal-close" onclick="closeModal('passwordModal')">×</button></div>
+    <div class="modal-body">
+      <label>Ancien mot de passe</label><input type="password" id="oldPass">
+      <label>Nouveau mot de passe</label><input type="password" id="newPass1">
+      <label>Confirmer le nouveau mot de passe</label><input type="password" id="newPass2">
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="changePassword()">Enregistrer</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="cloudModal">
+  <div class="modal" style="width:700px; max-height:80vh; overflow:auto;">
+    <div class="modal-header"><h3>☁️ Synchronisation Cloud</h3><button class="modal-close" onclick="closeModal('cloudModal')">×</button></div>
+    <div class="modal-body">
+      <div style="padding:15px; background:#fef3c7; border:2px solid var(--warning); border-radius:6px; margin-bottom:15px; font-size:12px;">
+        <b>📌 Important :</b> La synchronisation est désormais automatique et perpétuelle. Vos identifiants sont pré-configurés.
+      </div>
+      <div class="supabase-config">
+        <h4 style="color:var(--primary); margin-bottom:10px; font-size:14px;">⚙️ Configuration Supabase</h4>
+        <label>URL du projet Supabase</label><input type="text" id="supabaseUrl" placeholder="https://xxxxx.supabase.co">
+        <label>Clé publique (Anon Key)</label><input type="text" id="supabaseKey" placeholder="eyJhbGciOi...">
+        <div style="margin-top:15px;">
+          <button class="btn btn-primary" onclick="testAndSaveSupabase()">🔗 Tester et enregistrer</button>
+        </div>
+        <div id="supabaseTestResult" style="margin-top:10px; font-size:12px;"></div>
+      </div>
+      <div style="margin-top:20px; padding:15px; background:#e0e7ff; border-radius:6px;">
+        <button class="btn btn-primary" onclick="exportAllData()" style="width:100%; margin-bottom:10px;">📥 Exporter toutes les données (JSON)</button>
+        <label class="btn btn-success" style="width:100%; text-align:center; display:block; margin-bottom:10px;">📤 Importer des données (JSON)<input type="file" accept=".json" onchange="importAllData(event)" style="display:none;"></label>
+        <button class="btn btn-info" onclick="syncToSupabase()" style="width:100%;">🔄 Forcer la synchronisation maintenant</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="userModal">
+  <div class="modal" style="width:700px;">
+    <div class="modal-header"><h3>👤 Gestion des utilisateurs</h3><button class="modal-close" onclick="closeModal('userModal')">×</button></div>
+    <div class="modal-body" id="userModalBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="importModal">
+  <div class="modal" style="width:500px;">
+    <div class="modal-header"><h3>📥 Importer un fichier Excel</h3><button class="modal-close" onclick="closeModal('importModal')">×</button></div>
+    <div class="modal-body">
+      <label>Sélectionner le fichier Excel</label><input type="file" id="importFile" accept=".xlsx,.xls">
+      <label>Feuille à importer</label><select id="importSheet"></select>
+      <label>Direction cible</label><select id="importDirection"></select>
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="processImport()">Importer</button></div>
+  </div>
+</div>
+
+<script>
+const DIRECTIONS = [
+  "Agence Comptable", "Bureau comptable Matières principal",
+  "Direction de la Formation continue et de la Recherche-action",
+  "Direction de l'Administration des Finances",
+  "Direction du contrôle des marchés et des engagements financiers",
+  "Direction des Etudes et des Stages",
+  "Direction des Ressources humaines", "Direction générale",
+  "Direction régionale de l'INFPE de Bankui",
+  "Direction régionale de l'INFPE de Oubri",
+  "Direction régionale de l'INFPE de Yaadga",
+  "Direction régionale de l'INFPE du Djôrô",
+  "Direction régionale de l'INFPE du Goulmou",
+  "Direction régionale de l'INFPE du Guiriko",
+  "Direction régionale de l'INFPE du Liptako",
+  "Direction régionale de l'INFPE du Nakambé",
+  "Secrétariat général"
+];
+
+const CODE_PREFIX = {
+  "Agence Comptable": "/23/421.08/11/18/03/",
+  "Bureau comptable Matières principal": "/23/421.08/11/18/03/",
+  "Direction de l'Administration des Finances": "/23/421.08/11/18/03/",
+  "Direction de la Formation continue et de la Recherche-action": "/23/421.08/11/18/03/",
+  "Direction du contrôle des marchés et des engagements financiers": "/23/421.08/11/18/03/",
+  "Direction des Etudes et des Stages": "/23/421.08/11/18/03/",
+  "Direction des Ressources humaines": "/23/421.08/11/18/03/",
+  "Direction générale": "/23/421.08/11/18/03/",
+  "Secrétariat général": "/23/421.08/11/18/03/",
+  "Direction régionale de l'INFPE de Oubri": "/23/421.08/11/18/03/",
+  "Direction régionale de l'INFPE de Bankui": "/23/421.10/01/15/02/",
+  "Direction régionale de l'INFPE du Djôrô": "/23/421.16/13/21/24/",
+  "Direction régionale de l'INFPE du Goulmou": "/23/421.11/08/09/03/",
+  "Direction régionale de l'INFPE du Guiriko": "/23/421.13/09/10/02/",
+  "Direction régionale de l'INFPE du Nakambé": "/23/421.11/04/04/10/",
+  "Direction régionale de l'INFPE de Yaadga": "/23/421.13/10/29/07/"
+};
+
+const COLONNES = ["CODE MATIERE", "DESIGNATION", "TYPE/MODELE", "QTE", "ETAT", "FORMAT", "ANNEE D'ACQUISITION", "BUREAU/SERVICE", "UTILISATEUR", "DIRECTION REGIONALE", "DATE INVENTAIRE"];
+
+let DB = { biens: [], users: [], currentUser: null, nomenclature: {}, personnel: [], services: [], modeles: [], logo: null, actions: [] };
+let currentTab = 'dashboard';
+let editingBienId = null;
+let supabase = null;
+let syncTimeout = null;
+
+// ⚠️ IDENTIFIANTS SUPABASE INTÉGRÉS ET PRÊTS À L'EMPLOI ⚠️
+const DEFAULT_SUPABASE_URL = 'https://jpzbdhmktvbwzhhmxmaz.supabase.co';
+const DEFAULT_SUPABASE_KEY = 'sb_publishable_JbAgx2R8-dg3Uk-27Tr4Zw_lRFAP-wu';
+
+const DB_NAME = 'infpe_patrimoine';
+let idb = null;
+
+function isAdmin() { return DB.currentUser && DB.currentUser.type === 'Administrateur'; }
+
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 2);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('biens')) db.createObjectStore('biens', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains('users')) db.createObjectStore('users', { keyPath: 'username' });
+      if (!db.objectStoreNames.contains('refs')) db.createObjectStore('refs', { keyPath: 'key' });
+      if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'key' });
+    };
+    req.onsuccess = e => { idb = e.target.result; resolve(idb); };
+    req.onerror = e => reject(e);
+  });
+}
+
+async function loadFromIDB() {
+  try {
+    const tx = idb.transaction(['biens', 'users', 'refs', 'settings'], 'readonly');
+    const biens = await new Promise(r => { const req = tx.objectStore('biens').getAll(); req.onsuccess = () => r(req.result); });
+    const users = await new Promise(r => { const req = tx.objectStore('users').getAll(); req.onsuccess = () => r(req.result); });
+    const refs = await new Promise(r => { const req = tx.objectStore('refs').getAll(); req.onsuccess = () => r(req.result); });
+    const settings = await new Promise(r => { const req = tx.objectStore('settings').getAll(); req.onsuccess = () => r(req.result); });
+    DB.biens = biens || []; DB.users = users || [];
+    refs.forEach(r => {
+      if (r.key === 'nomenclature') DB.nomenclature = r.value || {};
+      else if (r.key === 'personnel') DB.personnel = r.value || [];
+      else if (r.key === 'services') DB.services = r.value || [];
+      else if (r.key === 'modeles') DB.modeles = r.value || [];
+    });
+    settings.forEach(s => { if (s.key === 'logo') DB.logo = s.value; });
+    DB.currentUser = null;
+    if (DB.users.length === 0) {
+      // Compte administrateur par défaut créé en arrière-plan (non affiché à l'écran)
+      DB.users = [{ username: 'admin', password: 'admin', type: 'Administrateur', nom: 'Administrateur', prenom: 'Principal', directions: [...DIRECTIONS] }];
+      await saveDB();
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function saveDB() {
+  try {
+    const tx = idb.transaction(['biens', 'users', 'refs', 'settings'], 'readwrite');
+    const bs = tx.objectStore('biens'); bs.clear(); DB.biens.forEach(b => bs.put(b));
+    const us = tx.objectStore('users'); us.clear(); DB.users.forEach(u => us.put(u));
+    const rs = tx.objectStore('refs');
+    rs.put({ key: 'nomenclature', value: DB.nomenclature });
+    rs.put({ key: 'personnel', value: DB.personnel });
+    rs.put({ key: 'services', value: DB.services });
+    rs.put({ key: 'modeles', value: DB.modeles });
+    const ss = tx.objectStore('settings');
+    if (DB.logo) ss.put({ key: 'logo', value: DB.logo });
+    await new Promise((resolve, reject) => { tx.oncomplete = () => resolve(); tx.onerror = e => reject(e); });
+    
+    // 🔄 SYNCHRONISATION PERPÉTUELLE EN ARRIÈRE-PLAN
+    if (supabase) triggerBackgroundSync();
+  } catch(e) { console.error('Erreur sauvegarde:', e); }
+}
+
+function triggerBackgroundSync() {
+  if (syncTimeout) clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(() => { syncToSupabaseBackground(); }, 1500);
+}
+
+async function syncToSupabaseBackground() {
+  if (!supabase) return;
+  try {
+    if (DB.biens.length > 0) await supabase.from('biens').upsert(DB.biens, { onConflict: 'id' });
+    if (DB.users.length > 0) await supabase.from('users').upsert(DB.users, { onConflict: 'username' });
+    const refsToSync = [
+      { key: 'nomenclature', value: DB.nomenclature },
+      { key: 'personnel', value: DB.personnel },
+      { key: 'services', value: DB.services },
+      { key: 'modeles', value: DB.modeles }
+    ];
+    for (const ref of refsToSync) await supabase.from('refs').upsert(ref, { onConflict: 'key' });
+    if (DB.logo) await supabase.from('settings').upsert({ key: 'logo', value: DB.logo }, { onConflict: 'key' });
+    updateSupabaseStatus(true);
+  } catch(e) {
+    console.warn('⚠️ Erreur de synchronisation:', e.message);
+    updateSupabaseStatus(false);
+  }
+}
+
+async function loadFromSupabase() {
+  if (!supabase) return false;
+  try {
+    const { data: biens, error: errBiens } = await supabase.from('biens').select('*');
+    if (!errBiens && biens && biens.length > 0) DB.biens = biens;
+    
+    const { data: users, error: errUsers } = await supabase.from('users').select('*');
+    if (!errUsers && users && users.length > 0) DB.users = users;
+    
+    const { data: refs, error: errRefs } = await supabase.from('refs').select('*');
+    if (!errRefs && refs && refs.length > 0) {
+      refs.forEach(r => {
+        if (r.key === 'nomenclature') DB.nomenclature = r.value || {};
+        else if (r.key === 'personnel') DB.personnel = r.value || [];
+        else if (r.key === 'services') DB.services = r.value || [];
+        else if (r.key === 'modeles') DB.modeles = r.value || [];
+      });
+    }
+    
+    const { data: settings, error: errSettings } = await supabase.from('settings').select('*');
+    if (!errSettings && settings && settings.length > 0) {
+      settings.forEach(s => { if (s.key === 'logo') DB.logo = s.value; });
+    }
+    await saveDB();
+    return true;
+  } catch(e) {
+    console.warn('Erreur de chargement depuis Supabase:', e);
+    return false;
+  }
+}
+
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (!u || !p) { document.getElementById('loginError').textContent = '❌ Veuillez saisir un nom d\'utilisateur et un mot de passe'; return; }
+  const user = DB.users.find(x => x.username === u && x.password === p);
+  if (!user) { document.getElementById('loginError').textContent = '❌ Identifiants incorrects'; return; }
+  DB.currentUser = user;
+  sessionStorage.setItem('infpe_current_user', JSON.stringify(user));
+  await saveDB();
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('currentUserDisplay').textContent = '👤 ' + user.prenom + ' ' + user.nom + ' (' + user.type + ')';
+  document.getElementById('loginError').textContent = '';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  initApp();
+}
+
+function doLogout() {
+  if (!confirm('Voulez-vous vraiment vous déconnecter ?')) return;
+  DB.currentUser = null;
+  sessionStorage.removeItem('infpe_current_user');
+  saveDB();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('contentArea').innerHTML = '';
+  document.getElementById('tabsContainer').innerHTML = '';
+  currentTab = 'dashboard';
+}
+
+function initSupabase() {
+  // VÉRIFICATION DE SÉCURITÉ POUR ÉVITER L'ERREUR "createClient"
+  if (typeof window.supabase === 'undefined') {
+    console.error('❌ La bibliothèque Supabase ne s\'est pas chargée. Vérifiez votre connexion Internet.');
+    updateSupabaseStatus(false);
+    return false;
+  }
+
+  const url = localStorage.getItem('supabase_url') || DEFAULT_SUPABASE_URL;
+  const key = localStorage.getItem('supabase_key') || DEFAULT_SUPABASE_KEY;
+  
+  if (url && key) {
+    try { 
+      supabase = window.supabase.createClient(url, key); 
+      updateSupabaseStatus(true); 
+      return true; 
+    } catch(e) { 
+      updateSupabaseStatus(false); 
+      return false; 
+    }
+  }
+  updateSupabaseStatus(false); return false;
+}
+
+function updateSupabaseStatus(connected) {
+  const el = document.getElementById('supabaseStatus');
+  if (!el) return;
+  el.innerHTML = connected ? '<span class="status-badge status-connected">● Connecté</span>' : '<span class="status-badge status-disconnected">○ Déconnecté</span>';
+}
+
+async function testAndSaveSupabase() {
+  const url = document.getElementById('supabaseUrl').value.trim();
+  const key = document.getElementById('supabaseKey').value.trim();
+  const resultDiv = document.getElementById('supabaseTestResult');
+  if (!url || !key) { resultDiv.innerHTML = '<span style="color:red;">❌ Veuillez remplir tous les champs</span>'; return; }
+  try {
+    const testClient = window.supabase.createClient(url, key);
+    const { error } = await testClient.from('biens').select('count').limit(1);
+    if (error && error.code !== 'PGRST116') throw error;
+    localStorage.setItem('supabase_url', url);
+    localStorage.setItem('supabase_key', key);
+    supabase = testClient;
+    updateSupabaseStatus(true);
+    resultDiv.innerHTML = '<span style="color:#10b981;">✅ Connexion réussie ! Synchronisation perpétuelle activée.</span>';
+    setTimeout(() => { resultDiv.innerHTML = ''; }, 3000);
+  } catch(e) { resultDiv.innerHTML = `<span style="color:red;">❌ Erreur : ${e.message}</span>`; }
+}
+
+async function syncToSupabase() {
+  if (!supabase) { alert('Supabase n\'est pas configuré.'); return; }
+  try {
+    await syncToSupabaseBackground();
+    alert('✅ Synchronisation manuelle réussie !');
+  } catch(e) { alert('❌ Erreur : ' + e.message); }
+}
+
+async function initApp() { initSupabase(); buildTabs(); showTab('dashboard'); }
+
+function buildTabs() {
+  const container = document.getElementById('tabsContainer');
+  container.innerHTML = '';
+  const user = DB.currentUser;
+  if (!user) return;
+  const allowedDirs = user.directions || DIRECTIONS;
+  const admin = isAdmin();
+  addTabBtn(container, 'dashboard', '📊 Tableau de bord', 'Vue d\'ensemble');
+  allowedDirs.forEach(dir => {
+    const id = 'dir_' + dir.replace(/[^a-zA-Z0-9]/g, '_');
+    const shortName = dir.length > 30 ? dir.substring(0, 28) + '…' : dir;
+    addTabBtn(container, id, '🏢 ' + shortName, 'Gérer les biens de : ' + dir);
+  });
+  if (admin) addTabBtn(container, 'general', '📋 Liste générale', 'Liste complète (Admin)');
+  if (admin) addTabBtn(container, 'params', '⚙️ Paramètres', 'Configuration (Admin)');
+}
+
+function addTabBtn(container, id, label, tooltip) {
+  const btn = document.createElement('button');
+  btn.className = 'tab-btn'; btn.dataset.tab = id; btn.textContent = label;
+  if (tooltip) btn.setAttribute('data-tooltip', tooltip);
+  btn.onclick = () => showTab(id);
+  container.appendChild(btn);
+}
+
+const ANIMATIONS = ['anim-slideRight', 'anim-slideLeft', 'anim-slideDown', 'anim-slideUp', 'anim-zoomOut', 'anim-zoomIn'];
+const COLORS = ['#1e3a8a', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+function showTab(tabId) {
+  if ((tabId === 'general' || tabId === 'params') && !isAdmin()) {
+    alert('⛔ Accès réservé à l\'administrateur.');
+    showTab('dashboard');
+    return;
+  }
+  currentTab = tabId;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+  const content = document.getElementById('contentArea');
+  const anim = ANIMATIONS[Math.floor(Math.random() * ANIMATIONS.length)];
+  const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+  content.style.borderTop = '4px solid ' + color;
+  content.className = ''; void content.offsetWidth; content.classList.add(anim);
+  if (tabId === 'dashboard') renderDashboard();
+  else if (tabId === 'general') renderGeneralList();
+  else if (tabId === 'params') renderParams();
+  else if (tabId.startsWith('dir_')) {
+    const dirName = DIRECTIONS.find(d => 'dir_' + d.replace(/[^a-zA-Z0-9]/g, '_') === tabId);
+    if (dirName) renderDirectionTab(dirName);
+  }
+}
+
+function showSubTab(tabId, sub, btn) {
+  btn.parentElement.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll(`[id^="${tabId}_"]`).forEach(c => c.classList.remove('active'));
+  document.getElementById(tabId + '_' + sub).classList.add('active');
+}
+
+function refreshCurrentView(preserveSearch = true) {
+  const savedSearches = {};
+  if (preserveSearch) {
+    document.querySelectorAll('.search-bar input').forEach(input => { savedSearches[input.id] = input.value; });
+  }
+  if (currentTab === 'dashboard') renderDashboard();
+  else if (currentTab === 'general') renderGeneralList();
+  else if (currentTab === 'params') renderParams();
+  else if (currentTab.startsWith('dir_')) {
+    const dirName = DIRECTIONS.find(d => 'dir_' + d.replace(/[^a-zA-Z0-9]/g, '_') === currentTab);
+    if (dirName) renderDirectionTab(dirName);
+  }
+  if (preserveSearch) {
+    setTimeout(() => {
+      Object.keys(savedSearches).forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+          input.value = savedSearches[id];
+          if (savedSearches[id]) {
+            const containerId = id.replace(/_search_(code|annee|numero|general)$/, '');
+            if (document.getElementById(containerId)) filterTable(containerId);
+          }
+        }
+      });
+    }, 50);
+  }
+}
+
+function renderDashboard() {
+  const content = document.getElementById('contentArea');
+  const userDirs = DB.currentUser?.directions || DIRECTIONS;
+  const biens = DB.biens.filter(b => userDirs.includes(b.direction));
+  const totalBiens = biens.length;
+  const nbDirections = new Set(biens.map(b => b.direction)).size;
+  const parEtat = {}; biens.forEach(b => { parEtat[b.ETAT] = (parEtat[b.ETAT] || 0) + 1; });
+  const parDir = {}; biens.forEach(b => { parDir[b.direction] = (parDir[b.direction] || 0) + 1; });
+  const sortedDirs = Object.entries(parDir).sort((a,b) => a[1] - b[1]);
+  const maxVal = Math.max(...sortedDirs.map(x => x[1]), 1);
+  let html = `
+    <div style="display:flex; gap:20px; align-items:center; margin-bottom:20px;">
+      ${DB.logo ? `<img src="${DB.logo}" class="logo-display">` : '<div style="width:150px; height:80px; background:#e5e7eb; display:flex; align-items:center; justify-content:center; border-radius:6px;">Logo</div>'}
+      <div><h2 style="color:var(--primary);">Tableau de bord - INFPE</h2><p style="color:#6b7280;">Système synchronisé en temps réel</p></div>
+    </div>
+    <div class="dashboard-grid">
+      <div class="stat-card"><h4>📦 Nombre total de biens</h4><div class="value">${totalBiens}</div></div>
+      <div class="stat-card"><h4>🏢 Directions actives</h4><div class="value">${nbDirections}</div></div>
+      <div class="stat-card"><h4>📊 Par état</h4><div style="font-size:12px; margin-top:5px;">${Object.entries(parEtat).map(([e,n]) => `<div><b>${e}:</b> ${n}</div>`).join('')}</div></div>
+    </div>
+    <div class="chart-container">
+      <h4 style="color:var(--primary); margin-bottom:15px;">📊 Nombre de biens par direction</h4>
+      <div class="bar-chart" id="dashChart">
+        ${sortedDirs.map(([dir, n]) => {
+          const h = (n / maxVal) * 160;
+          return `<div class="bar-item"><div class="bar-value">${n}</div><div class="bar-fill" style="height:0px;" data-target="${h}"></div><div class="bar-label">${dir.replace('Direction régionale de l\'INFPE ', 'DR ').replace('Direction de ', 'D. ').replace('Direction ', 'D.')}</div></div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  content.innerHTML = html;
+  setTimeout(() => { document.querySelectorAll('#dashChart .bar-fill').forEach(bar => { bar.style.height = bar.dataset.target + 'px'; }); }, 100);
+}
+
+function renderDirectionTab(direction) {
+  const content = document.getElementById('contentArea');
+  const userDirs = DB.currentUser?.directions || DIRECTIONS;
+  if (!userDirs.includes(direction)) { content.innerHTML = '<p style="color:red; padding:20px;">⛔ Accès non autorisé.</p>'; return; }
+  const tabId = 'dir_' + direction.replace(/[^a-zA-Z0-9]/g, '_');
+  const escDir = direction.replace(/'/g, "\\'");
+  const admin = isAdmin();
+  const importBtn = admin ? `<button class="btn btn-success" onclick="openImport('${escDir}')">📥 Importer Excel</button>` : '';
+  const deleteAllBtn = admin ? `<button class="btn btn-delete" onclick="deleteAllBiens('${escDir}')">🗑️ Tout supprimer</button>` : '';
+  
+  content.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <h2 style="color:var(--primary);">🏢 ${direction}</h2>
+      <div>
+        <button class="btn btn-primary" onclick="openAddBien('${escDir}')">➕ Nouveau bien</button>
+        ${importBtn} ${deleteAllBtn}
+      </div>
+    </div>
+    <div class="sub-tabs">
+      <button class="sub-tab-btn active" onclick="showSubTab('${tabId}', 'biens', this)">📋 Liste des biens</button>
+      <button class="sub-tab-btn" onclick="showSubTab('${tabId}', 'existants', this)">✅ Biens existants</button>
+      <button class="sub-tab-btn" onclick="showSubTab('${tabId}', 'noncoches', this)">❌ Biens non cochés</button>
+      <button class="sub-tab-btn" onclick="showSubTab('${tabId}', 'synthese', this)">📊 Synthèse</button>
+      <button class="sub-tab-btn" onclick="showSubTab('${tabId}', 'syntheseNon', this)">📊 Synthèse non cochés</button>
+      <button class="sub-tab-btn" onclick="showSubTab('${tabId}', 'confrontation', this)">⚖️ Confrontation</button>
+      <button class="sub-tab-btn" onclick="showSubTab('${tabId}', 'reformes', this)">🔄 Réformes</button>
+    </div>
+    <div class="sub-content active" id="${tabId}_biens"></div>
+    <div class="sub-content" id="${tabId}_existants"></div>
+    <div class="sub-content" id="${tabId}_noncoches"></div>
+    <div class="sub-content" id="${tabId}_synthese"></div>
+    <div class="sub-content" id="${tabId}_syntheseNon"></div>
+    <div class="sub-content" id="${tabId}_confrontation"></div>
+    <div class="sub-content" id="${tabId}_reformes"></div>`;
+  renderBiensList(direction, tabId + '_biens', null);
+  renderBiensList(direction, tabId + '_existants', true, true);
+  renderBiensList(direction, tabId + '_noncoches', true, false);
+  renderSynthese(direction, tabId + '_synthese', true);
+  renderSynthese(direction, tabId + '_syntheseNon', false);
+  renderConfrontation(direction, tabId + '_confrontation');
+  renderReformes(direction, tabId + '_reformes');
+}
+
+function renderBiensList(direction, containerId, filterChecked, checkedValue) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  let biens = DB.biens.filter(b => b.direction === direction && !b.reforme);
+  if (filterChecked !== null) biens = biens.filter(b => b.checked === checkedValue);
+  const searchId = containerId + '_search';
+  const tableId = containerId + '_table';
+  container.innerHTML = `
+    <div class="search-bar">
+      <input type="text" id="${searchId}_code" placeholder="Code" maxlength="6" oninput="filterTable('${containerId}')" style="width:80px;">
+      <input type="text" id="${searchId}_annee" placeholder="Année" maxlength="4" oninput="filterTable('${containerId}')" style="width:70px;">
+      <input type="text" id="${searchId}_numero" placeholder="Numéro" maxlength="4" oninput="filterTable('${containerId}')" style="width:70px;">
+      <input type="text" id="${searchId}_general" placeholder="🔍 Recherche générale..." oninput="filterTable('${containerId}')" style="flex:1; min-width:200px;">
+      <div class="search-count" id="${searchId}_count">${biens.length} bien(s)</div>
+      <button class="btn btn-primary" onclick="toggleAllCheck('${containerId}')">☑️ Tout cocher/décocher</button>
+      <button class="btn" style="background:#6b7280; color:white;" onclick="chooseColumns('${containerId}')">👁️ Colonnes</button>
+    </div>
+    <div class="checkbox-grid" id="${containerId}_colCheck" style="display:none;"></div>
+    <div class="table-wrapper"><table class="patrimoine-table" id="${tableId}"><thead><tr id="${tableId}_head"></tr></thead><tbody id="${tableId}_body"></tbody></table></div>`;
+  container.dataset.biens = JSON.stringify(biens);
+  container.dataset.direction = direction;
+  if (!window.visibleCols) window.visibleCols = {};
+  if (!window.visibleCols[containerId]) window.visibleCols[containerId] = [...COLONNES, 'ACTIONS'];
+  fillTableHead(containerId); fillTableBody(containerId, biens);
+}
+
+function fillTableHead(containerId) {
+  const tableId = containerId + '_table';
+  const head = document.getElementById(tableId + '_head');
+  const cols = window.visibleCols[containerId];
+  head.innerHTML = cols.map(c => `<th>${c}</th>`).join('');
+}
+
+function fillTableBody(containerId, biens) {
+  const tableId = containerId + '_table';
+  const body = document.getElementById(tableId + '_body');
+  const cols = window.visibleCols[containerId];
+  const isExistants = containerId.includes('_existants');
+  const admin = isAdmin();
+  let html = '';
+  biens.forEach(b => {
+    html += `<tr ondblclick="toggleCheckByDoubleClick('${b.id}', '${containerId}')">`;
+    cols.forEach(c => {
+      if (c === 'ACTIONS') {
+        html += `<td style="white-space:nowrap;">
+          <input type="checkbox" ${b.checked ? 'checked' : ''} onchange="toggleCheck('${b.id}', this.checked)">
+          <button class="btn btn-edit" onclick="editBien('${b.id}')">✏️</button>
+          ${admin && !isExistants ? `<button class="btn btn-delete" onclick="deleteBien('${b.id}', this)">🗑️</button>` : ''}
+          ${!isExistants ? `<button class="btn btn-reforme" onclick="proposeReforme('${b.id}', this)">🔄</button>` : ''}
+        </td>`;
+      } else { html += `<td>${b[c] || ''}</td>`; }
+    });
+    html += '</tr>';
+  });
+  body.innerHTML = html || '<tr><td colspan="' + cols.length + '" style="text-align:center; padding:20px; color:#6b7280;">Aucun bien</td></tr>';
+}
+
+async function toggleCheckByDoubleClick(bienId, containerId) {
+  const bien = DB.biens.find(b => b.id === bienId);
+  if (!bien) return;
+  bien.checked = !bien.checked;
+  if (bien.checked && !bien['DATE INVENTAIRE']) bien['DATE INVENTAIRE'] = new Date().toISOString().split('T')[0];
+  await saveDB(); refreshCurrentView(true);
+}
+
+function filterTable(containerId) {
+  const container = document.getElementById(containerId);
+  const searchId = containerId + '_search';
+  const code = document.getElementById(searchId + '_code').value.trim().toUpperCase();
+  const annee = document.getElementById(searchId + '_annee').value.trim();
+  const numero = document.getElementById(searchId + '_numero').value.trim();
+  const general = document.getElementById(searchId + '_general').value.trim().toLowerCase();
+  let biens = JSON.parse(container.dataset.biens);
+  biens = biens.filter(b => {
+    if (code && !(b['CODE MATIERE'] || '').toUpperCase().startsWith(code)) return false;
+    if (annee && !(b['ANNEE D\'ACQUISITION'] || '').includes(annee)) return false;
+    if (numero) { const num = (b['CODE MATIERE'] || '').slice(-4); if (!num.includes(numero)) return false; }
+    if (general) { const txt = Object.values(b).join(' ').toLowerCase(); if (!txt.includes(general)) return false; }
+    return true;
+  });
+  document.getElementById(searchId + '_count').textContent = biens.length + ' bien(s)';
+  fillTableBody(containerId, biens);
+}
+
+async function toggleCheck(bienId, checked) {
+  const bien = DB.biens.find(b => b.id === bienId);
+  if (!bien) return;
+  bien.checked = checked;
+  if (checked && !bien['DATE INVENTAIRE']) bien['DATE INVENTAIRE'] = new Date().toISOString().split('T')[0];
+  await saveDB(); refreshCurrentView(true);
+}
+
+async function toggleAllCheck(containerId) {
+  const container = document.getElementById(containerId);
+  const biens = JSON.parse(container.dataset.biens);
+  const allChecked = biens.every(b => b.checked);
+  biens.forEach(b => {
+    const bien = DB.biens.find(x => x.id === b.id);
+    if (bien) { bien.checked = !allChecked; if (bien.checked && !bien['DATE INVENTAIRE']) bien['DATE INVENTAIRE'] = new Date().toISOString().split('T')[0]; }
+  });
+  await saveDB(); refreshCurrentView(true);
+}
+
+function chooseColumns(containerId) {
+  const div = document.getElementById(containerId + '_colCheck');
+  const cols = window.visibleCols[containerId];
+  const allCols = [...COLONNES, 'ACTIONS'];
+  div.innerHTML = allCols.map(c => `<label><input type="checkbox" ${cols.includes(c) ? 'checked' : ''} onchange="updateCols('${containerId}', '${c}', this.checked)"> ${c}</label>`).join('');
+  div.style.display = div.style.display === 'none' ? 'flex' : 'none';
+}
+
+function updateCols(containerId, col, checked) {
+  let cols = window.visibleCols[containerId];
+  if (checked && !cols.includes(col)) cols.push(col);
+  if (!checked) cols = cols.filter(c => c !== col);
+  window.visibleCols[containerId] = cols;
+  fillTableHead(containerId);
+  const container = document.getElementById(containerId);
+  fillTableBody(containerId, JSON.parse(container.dataset.biens));
+}
+
+function renderSynthese(direction, containerId, onlyChecked) {
+  const container = document.getElementById(containerId);
+  let biens = DB.biens.filter(b => b.direction === direction && !b.reforme);
+  if (onlyChecked !== null) biens = biens.filter(b => b.checked === onlyChecked);
+  const synth = {};
+  biens.forEach(b => {
+    const code6 = (b['CODE MATIERE'] || '').substring(0, 6);
+    if (!code6) return;
+    if (!synth[code6]) synth[code6] = { code: code6, designation: b['DESIGNATION'] || '', Bon: 0, Passable: 0, 'En panne': 0, Mauvais: 0, Perdu: 0, total: 0 };
+    const etat = b['ETAT'] || '';
+    if (synth[code6][etat] !== undefined) synth[code6][etat]++;
+    synth[code6].total++;
+  });
+  const rows = Object.values(synth);
+  container.innerHTML = `
+    <div style="margin-bottom:10px;"><button class="btn btn-success" onclick="exportSynthese('${direction}', ${onlyChecked})">📊 Exporter synthèse Excel</button></div>
+    <div class="table-wrapper">
+      <table class="patrimoine-table">
+        <thead><tr><th>Code matière</th><th>Désignation</th><th style="background:#10b981;">Bon</th><th style="background:#f59e0b;">Passable</th><th style="background:#ef4444;">En panne</th><th style="background:#7c2d12;">Mauvais</th><th style="background:#1e3a8a; color:white;">Total</th></tr></thead>
+        <tbody>${rows.map(r => `<tr><td>${r.code}</td><td>${r.designation}</td><td style="background:#d1fae5;">${r.Bon}</td><td style="background:#fef3c7;">${r.Passable}</td><td style="background:#fee2e2;">${r['En panne']}</td><td style="background:#fed7aa;">${r.Mauvais}</td><td style="background:#dbeafe; font-weight:bold;">${r.total}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderConfrontation(direction, containerId) {
+  const container = document.getElementById(containerId);
+  const tousBiens = DB.biens.filter(b => b.direction === direction && !b.reforme);
+  const biensImportes = tousBiens.filter(b => b.source === 'import');
+  const biensImportesCoches = biensImportes.filter(b => b.checked);
+  const biensImportesNonCoches = biensImportes.filter(b => !b.checked);
+  const biensSaisis = tousBiens.filter(b => b.source === 'saisie' || !b.source);
+  
+  function genererListeBiens(biens) {
+    if (biens.length === 0) return '<p style="color:#6b7280; padding:10px; text-align:center;">Aucun bien</p>';
+    return `<div class="item-list">${biens.map(b => `<div class="item-row"><span class="item-code">${b['CODE MATIERE'] || 'N/A'}</span><span class="item-designation">${b['DESIGNATION'] || ''}</span><span class="item-etat">${b['ETAT'] || 'N/A'}</span><span>${b['ANNEE D\'ACQUISITION'] || ''}</span></div>`).join('')}</div>`;
+  }
+  
+  container.innerHTML = `
+    <h3 style="color:var(--primary); margin-bottom:15px;">⚖️ Confrontation - ${direction}</h3>
+    <div class="dashboard-grid">
+      <div class="stat-card" style="background:#fee2e2;"><h4>❌ Biens manquants</h4><div class="value">${biensImportesNonCoches.length}</div></div>
+      <div class="stat-card" style="background:#d1fae5;"><h4>✅ Biens existants</h4><div class="value">${biensImportesCoches.length}</div></div>
+      <div class="stat-card" style="background:#cffafe;"><h4>🆕 Nouvelles saisies</h4><div class="value">${biensSaisis.length}</div></div>
+      <div class="stat-card" style="background:#dbeafe;"><h4>📦 Total importés</h4><div class="value">${biensImportes.length}</div></div>
+    </div>
+    <div class="confrontation-section section-manquants"><h4>❌ Biens manquants (non cochés)</h4>${genererListeBiens(biensImportesNonCoches)}</div>
+    <div class="confrontation-section section-existants"><h4>✅ Biens existants (cochés)</h4>${genererListeBiens(biensImportesCoches)}</div>
+    <div class="confrontation-section section-saisies"><h4>🆕 Nouvelles saisies</h4>${genererListeBiens(biensSaisis)}</div>
+    <div style="margin-top:15px;">
+      <button class="btn btn-success" onclick="exportConfrontation('${direction}')">📊 Exporter confrontation Excel</button>
+    </div>`;
+}
+
+function exportConfrontation(direction) {
+  const tousBiens = DB.biens.filter(b => b.direction === direction && !b.reforme);
+  const biensImportes = tousBiens.filter(b => b.source === 'import');
+  const biensImportesCoches = biensImportes.filter(b => b.checked);
+  const biensImportesNonCoches = biensImportes.filter(b => !b.checked);
+  const biensSaisis = tousBiens.filter(b => b.source === 'saisie' || !b.source);
+  const rows = [['CONFRONTATION - ' + direction], ['Manquants:', biensImportesNonCoches.length, 'Existants:', biensImportesCoches.length, 'Saisis:', biensSaisis.length], [], ['CODE', 'DESIGNATION', 'ETAT', 'ANNÉE', 'SOURCE']];
+  [...biensImportesNonCoches, ...biensImportesCoches, ...biensSaisis].forEach(b => {
+    rows.push([b['CODE MATIERE']||'', b['DESIGNATION']||'', b['ETAT']||'', b['ANNEE D\'ACQUISITION']||'', b.source || 'saisie']);
+  });
+  downloadExcel(rows, 'Confrontation_' + direction.replace(/\s/g, '_'));
+}
+
+function renderReformes(direction, containerId) {
+  const container = document.getElementById(containerId);
+  const biens = DB.biens.filter(b => b.direction === direction && b.reforme);
+  container.innerHTML = `
+    <div style="margin-bottom:10px;"><button class="btn btn-success" onclick="exportReformes('${direction}')">📊 Exporter réformes Excel</button></div>
+    <div class="table-wrapper">
+      <table class="patrimoine-table">
+        <thead><tr>${COLONNES.map(c=>`<th>${c}</th>`).join('')}<th>ACTIONS</th></tr></thead>
+        <tbody>${biens.map(b => `<tr>${COLONNES.map(c=>`<td>${b[c]||''}</td>`).join('')}<td><button class="btn btn-edit" onclick="cancelReforme('${b.id}')">↩️ Annuler</button></td></tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+async function proposeReforme(id, btnElement) {
+  if (!confirm('Proposer ce bien à la réforme ?')) return;
+  const bien = DB.biens.find(x => x.id === id);
+  if (!bien) return;
+  if (btnElement) {
+    const row = btnElement.closest('tr');
+    if (row) { row.classList.add('row-deleting'); await new Promise(resolve => setTimeout(resolve, 600)); }
+  }
+  bien.reforme = true;
+  await saveDB(); refreshCurrentView(true);
+}
+
+async function cancelReforme(id) {
+  const b = DB.biens.find(x => x.id === id);
+  if (b) { b.reforme = false; await saveDB(); refreshCurrentView(true); }
+}
+
+function renderGeneralList() {
+  if (!isAdmin()) { document.getElementById('contentArea').innerHTML = '<p style="color:red; padding:20px;">⛔ Accès réservé à l\'administrateur.</p>'; return; }
+  const content = document.getElementById('contentArea');
+  const biens = DB.biens.filter(b => !b.reforme);
+  content.innerHTML = `
+    <h2 style="color:var(--primary); margin-bottom:15px;">📋 Liste générale des biens</h2>
+    <div class="sub-tabs">
+      <button class="sub-tab-btn active" onclick="showSubTab('general', 'liste', this)">📋 Liste générale</button>
+      <button class="sub-tab-btn" onclick="showSubTab('general', 'synthese', this)">📊 Synthèse générale</button>
+      <button class="sub-tab-btn" onclick="showSubTab('general', 'confrontation', this)">⚖️ Confrontation générale</button>
+    </div>
+    <div class="sub-content active" id="general_liste"></div>
+    <div class="sub-content" id="general_synthese"></div>
+    <div class="sub-content" id="general_confrontation"></div>`;
+  const cListe = document.getElementById('general_liste');
+  cListe.innerHTML = `
+    <div class="search-bar">
+      <input type="text" id="general_search_code" placeholder="Code" maxlength="6" oninput="filterTable('general_liste')" style="width:80px;">
+      <input type="text" id="general_search_annee" placeholder="Année" maxlength="4" oninput="filterTable('general_liste')" style="width:70px;">
+      <input type="text" id="general_search_numero" placeholder="Numéro" maxlength="4" oninput="filterTable('general_liste')" style="width:70px;">
+      <input type="text" id="general_search_general" placeholder="🔍 Recherche..." oninput="filterTable('general_liste')" style="flex:1;">
+      <div class="search-count" id="general_search_count">${biens.length} bien(s)</div>
+      <button class="btn" style="background:#6b7280; color:white;" onclick="chooseColumns('general_liste')">👁️ Colonnes</button>
+    </div>
+    <div class="table-wrapper"><table class="patrimoine-table" id="general_liste_table"><thead><tr id="general_liste_table_head"></tr></thead><tbody id="general_liste_table_body"></tbody></table></div>`;
+  cListe.dataset.biens = JSON.stringify(biens);
+  if (!window.visibleCols['general_liste']) window.visibleCols['general_liste'] = [...COLONNES, 'ACTIONS'];
+  fillTableHead('general_liste'); fillTableBody('general_liste', biens);
+  renderGeneralSynthese(); renderGeneralConfrontation();
+}
+
+function renderGeneralSynthese() {
+  const c = document.getElementById('general_synthese');
+  const biens = DB.biens.filter(b => !b.reforme);
+  const synth = {};
+  biens.forEach(b => {
+    const code6 = (b['CODE MATIERE']||'').substring(0,6);
+    if (!code6) return;
+    if (!synth[code6]) synth[code6] = { code: code6, designation: b['DESIGNATION']||'', Bon:0, Passable:0, 'En panne':0, Mauvais:0, total:0 };
+    const e = b['ETAT']||'';
+    if (synth[code6][e] !== undefined) synth[code6][e]++;
+    synth[code6].total++;
+  });
+  const rows = Object.values(synth);
+  c.innerHTML = `
+    <button class="btn btn-success" onclick="exportGeneralSynthese()">📊 Exporter synthèse générale Excel</button>
+    <div class="table-wrapper" style="margin-top:10px;">
+      <table class="patrimoine-table">
+        <thead><tr><th>Code</th><th>Désignation</th><th style="background:#10b981;">Bon</th><th style="background:#f59e0b;">Passable</th><th style="background:#ef4444;">En panne</th><th style="background:#7c2d12;">Mauvais</th><th style="background:#1e3a8a; color:white;">Total</th></tr></thead>
+        <tbody>${rows.map(r => `<tr><td>${r.code}</td><td>${r.designation}</td><td style="background:#d1fae5;">${r.Bon}</td><td style="background:#fef3c7;">${r.Passable}</td><td style="background:#fee2e2;">${r['En panne']}</td><td style="background:#fed7aa;">${r.Mauvais}</td><td style="background:#dbeafe; font-weight:bold;">${r.total}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderGeneralConfrontation() {
+  const c = document.getElementById('general_confrontation');
+  const tousBiens = DB.biens.filter(b => !b.reforme);
+  const biensImportes = tousBiens.filter(b => b.source === 'import');
+  const biensImportesCoches = biensImportes.filter(b => b.checked);
+  const biensImportesNonCoches = biensImportes.filter(b => !b.checked);
+  const biensSaisis = tousBiens.filter(b => b.source === 'saisie' || !b.source);
+  
+  let html = '<h3 style="color:var(--primary); margin-bottom:15px;">⚖️ Confrontation générale</h3>';
+  html += `<div class="dashboard-grid">
+    <div class="stat-card" style="background:#fee2e2;"><h4>📉 Biens manquants</h4><div class="value">${biensImportesNonCoches.length}</div></div>
+    <div class="stat-card" style="background:#d1fae5;"><h4>✅ Biens existants</h4><div class="value">${biensImportesCoches.length}</div></div>
+    <div class="stat-card" style="background:#cffafe;"><h4>🆕 Nouvelles saisies</h4><div class="value">${biensSaisis.length}</div></div>
+    <div class="stat-card" style="background:#dbeafe;"><h4>📦 Total importés</h4><div class="value">${biensImportes.length}</div></div>
+  </div>`;
+  html += '<div style="margin-top:15px;"><button class="btn btn-info" onclick="exportConfrontationAll()">📊 Exporter confrontation complète Excel</button></div>';
+  c.innerHTML = html;
+}
+
+function exportConfrontationAll() {
+  const rows = [['CONFRONTATION GENERALE'], ['Date', new Date().toLocaleDateString('fr-FR')], [], ['RÉSUMÉ'], ['Manquants:', DB.biens.filter(b=>b.source==='import'&&!b.checked).length, 'Existants:', DB.biens.filter(b=>b.source==='import'&&b.checked).length, 'Saisis:', DB.biens.filter(b=>b.source==='saisie'||!b.source).length]];
+  downloadExcel(rows, 'Confrontation_Generale');
+}
+
+function renderParams() {
+  if (!isAdmin()) { document.getElementById('contentArea').innerHTML = '<p style="color:red; padding:20px;">⛔ Accès réservé à l\'administrateur.</p>'; return; }
+  const content = document.getElementById('contentArea');
+  content.innerHTML = `
+    <h2 style="color:var(--primary); margin-bottom:15px;">⚙️ Paramètres</h2>
+    <div class="sub-tabs">
+      <button class="sub-tab-btn active" onclick="showSubTab('params', 'users', this)">👤 Utilisateurs</button>
+      <button class="sub-tab-btn" onclick="showSubTab('params', 'nomen', this)">📚 Nomenclature</button>
+      <button class="sub-tab-btn" onclick="showSubTab('params', 'pers', this)">👥 Personnel</button>
+      <button class="sub-tab-btn" onclick="showSubTab('params', 'serv', this)">🏢 Services</button>
+      <button class="sub-tab-btn" onclick="showSubTab('params', 'mod', this)">🔧 Modèles</button>
+      <button class="sub-tab-btn" onclick="showSubTab('params', 'logo', this)">🖼️ Logo</button>
+    </div>
+    <div class="sub-content active" id="params_users"></div>
+    <div class="sub-content" id="params_nomen"></div>
+    <div class="sub-content" id="params_pers"></div>
+    <div class="sub-content" id="params_serv"></div>
+    <div class="sub-content" id="params_mod"></div>
+    <div class="sub-content" id="params_logo"></div>`;
+  renderUsersList();
+  renderRefImport('params_nomen', 'nomenclature', 'Nomenclature (col A=Code 6 car., col B=Désignation)');
+  renderRefImport('params_pers', 'personnel', 'Personnel (col A=Utilisateur)');
+  renderRefImport('params_serv', 'services', 'Services (col A=Bureau/Service)');
+  renderRefImport('params_mod', 'modeles', 'Modèles (col A=Type/Modèle)');
+  renderLogoUpload();
+}
+
+function renderUsersList() {
+  const c = document.getElementById('params_users');
+  c.innerHTML = `
+    <button class="btn btn-primary" onclick="addUser()">➕ Ajouter utilisateur</button>
+    <div class="table-wrapper" style="margin-top:10px;">
+      <table class="patrimoine-table">
+        <thead><tr><th>Nom</th><th>Prénom</th><th>Utilisateur</th><th>Type</th><th>Directions</th><th>Actions</th></tr></thead>
+        <tbody>${DB.users.map(u => `<tr><td>${u.nom}</td><td>${u.prenom}</td><td>${u.username}</td><td>${u.type}</td><td>${(u.directions||[]).length} direction(s)</td><td><button class="btn btn-edit" onclick="editUser('${u.username}')">✏️</button>${u.username !== DB.currentUser.username ? `<button class="btn btn-delete" onclick="deleteUser('${u.username}')">🗑️</button>` : ''}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+function addUser() {
+  const body = document.getElementById('userModalBody');
+  body.innerHTML = `
+    <h3>Ajouter un utilisateur</h3>
+    <label>Nom</label><input type="text" id="u_nom">
+    <label>Prénom</label><input type="text" id="u_prenom">
+    <label>Nom d'utilisateur</label><input type="text" id="u_username">
+    <label>Mot de passe</label><input type="password" id="u_password">
+    <label>Type</label><select id="u_type"><option>Administrateur</option><option>Directeur</option><option>Chef de service</option><option>Agent</option></select>
+    <label>Directions accessibles</label>
+    <div class="checkbox-grid">${DIRECTIONS.map(d => `<label><input type="checkbox" class="u_dir" value="${d}"> ${d}</label>`).join('')}</div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="saveNewUser()">Enregistrer</button><button class="btn" style="background:#6b7280; color:white;" onclick="closeModal('userModal')">Annuler</button></div>`;
+  openModal('userModal');
+}
+
+async function saveNewUser() {
+  const u = {
+    nom: document.getElementById('u_nom').value, prenom: document.getElementById('u_prenom').value,
+    username: document.getElementById('u_username').value, password: document.getElementById('u_password').value,
+    type: document.getElementById('u_type').value,
+    directions: [...document.querySelectorAll('.u_dir:checked')].map(c => c.value)
+  };
+  if (!u.username || !u.password) { alert('Username et mot de passe requis'); return; }
+  if (DB.users.find(x => x.username === u.username)) { alert('Username déjà existant'); return; }
+  DB.users.push(u); await saveDB(); closeModal('userModal'); renderUsersList(); buildTabs();
+}
+
+function editUser(username) {
+  const u = DB.users.find(x => x.username === username);
+  if (!u) return;
+  const body = document.getElementById('userModalBody');
+  const admin = isAdmin();
+  body.innerHTML = `
+    <h3>Modifier : ${username}</h3>
+    <label>Nom</label><input type="text" id="u_nom" value="${u.nom}" ${!admin?'readonly':''}>
+    <label>Prénom</label><input type="text" id="u_prenom" value="${u.prenom}" ${!admin?'readonly':''}>
+    <label>Nom d'utilisateur</label><input type="text" id="u_username" value="${u.username}" ${!admin?'readonly':''}>
+    <label>Type</label><select id="u_type" ${!admin?'disabled':''}>${['Administrateur','Directeur','Chef de service','Agent'].map(t => `<option ${t===u.type?'selected':''}>${t}</option>`).join('')}</select>
+    <label>Directions accessibles</label>
+    <div class="checkbox-grid">${DIRECTIONS.map(d => `<label><input type="checkbox" class="u_dir" value="${d}" ${u.directions?.includes(d)?'checked':''} ${!admin?'disabled':''}> ${d}</label>`).join('')}</div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="saveEditUser('${username}')">Enregistrer</button><button class="btn" style="background:#6b7280; color:white;" onclick="closeModal('userModal')">Annuler</button></div>`;
+  openModal('userModal');
+}
+
+async function saveEditUser(username) {
+  const u = DB.users.find(x => x.username === username);
+  if (!u) return;
+  if (isAdmin()) {
+    u.nom = document.getElementById('u_nom').value; u.prenom = document.getElementById('u_prenom').value;
+    u.username = document.getElementById('u_username').value; u.type = document.getElementById('u_type').value;
+    u.directions = [...document.querySelectorAll('.u_dir:checked')].map(c => c.value);
+  }
+  await saveDB(); closeModal('userModal'); renderUsersList(); buildTabs();
+}
+
+async function deleteUser(username) {
+  if (!confirm('Supprimer cet utilisateur ?')) return;
+  DB.users = DB.users.filter(u => u.username !== username);
+  await saveDB(); renderUsersList(); buildTabs();
+}
+
+function renderRefImport(containerId, key, label) {
+  const c = document.getElementById(containerId);
+  const data = DB[key];
+  const count = Array.isArray(data) ? data.length : Object.keys(data).length;
+  const preview = (Array.isArray(data) ? data : Object.entries(data).map(([k,v]) => k + ' → ' + v)).slice(0, 50);
+  c.innerHTML = `
+    <p><b>${label}</b> - ${count} entrée(s)</p>
+    <label class="btn btn-success" style="display:inline-block;">📥 Importer Excel<input type="file" accept=".xlsx,.xls" onchange="importRef(event, '${key}')" style="display:none;"></label>
+    <button class="btn btn-delete" onclick="clearRef('${key}')">🗑️ Vider</button>
+    <div class="table-wrapper" style="margin-top:10px; max-height:300px;">
+      <table class="patrimoine-table"><thead><tr><th>Entrée</th></tr></thead><tbody>${preview.map(v => `<tr><td>${v}</td></tr>`).join('')}</tbody></table>
+    </div>`;
+}
+
+async function importRef(event, key) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data);
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      if (key === 'nomenclature') {
+        DB.nomenclature = {};
+        rows.forEach(r => { if (r[0] && r[1]) DB.nomenclature[String(r[0]).substring(0,6)] = r[1]; });
+      } else {
+        const set = new Set(DB[key] || []);
+        rows.forEach(r => { if (r[0]) set.add(String(r[0]).trim()); });
+        DB[key] = [...set];
+      }
+      await saveDB(); renderParams(); alert('Import réussi !');
+    } catch(err) { alert('Erreur : ' + err.message); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function clearRef(key) {
+  if (!confirm('Vider cette référence ?')) return;
+  DB[key] = key === 'nomenclature' ? {} : [];
+  await saveDB(); renderParams();
+}
+
+function renderLogoUpload() {
+  const c = document.getElementById('params_logo');
+  c.innerHTML = `
+    <p><b>Logo de l'institution</b></p>
+    ${DB.logo ? `<img src="${DB.logo}" style="max-width:200px; border:2px solid var(--primary);"><br><br>` : ''}
+    <label class="btn btn-success" style="display:inline-block;">📥 Choisir une image JPG<input type="file" accept=".jpg,.jpeg,.png" onchange="uploadLogo(event)" style="display:none;"></label>
+    ${DB.logo ? `<button class="btn btn-delete" onclick="removeLogo()">🗑️ Supprimer</button>` : ''}`;
+}
+
+async function uploadLogo(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxW = 400, maxH = 200;
+      let w = img.width, h = img.height;
+      if (w > maxW) { h = h * maxW / w; w = maxW; }
+      if (h > maxH) { w = w * maxH / h; h = maxH; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      DB.logo = canvas.toDataURL('image/jpeg', 0.7);
+      saveDB(); renderLogoUpload();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function removeLogo() { DB.logo = null; await saveDB(); renderLogoUpload(); }
+
+function openAddBien(direction) {
+  editingBienId = null;
+  document.getElementById('newCodeMat').value = '';
+  document.getElementById('newCodeMat').readOnly = false;
+  document.getElementById('newCodeMat').setAttribute('maxlength', '6');
+  document.getElementById('newDesignation').value = '';
+  document.getElementById('newType').value = '';
+  document.getElementById('newQte').value = '1';
+  document.getElementById('newEtat').value = '';
+  document.getElementById('newFormat').value = '';
+  document.getElementById('newAnnee').value = '';
+  document.getElementById('newNumero').value = '';
+  document.getElementById('newBureau').value = '';
+  document.getElementById('newUtilisateur').value = '';
+  document.getElementById('newDirection').value = direction;
+  document.getElementById('newDateInv').value = new Date().toISOString().split('T')[0];
+  document.getElementById('codePreview').textContent = '—';
+  document.getElementById('duplicateWarning').style.display = 'none';
+  fillDatalist('listType', DB.modeles);
+  fillDatalist('listBureau', DB.services);
+  fillDatalist('listUtilisateur', DB.personnel);
+  const sel = document.getElementById('newDirection');
+  sel.innerHTML = DIRECTIONS.map(d => `<option ${d===direction?'selected':''}>${d}</option>`).join('');
+  ['keepDesignation','keepEtat','keepFormat','keepAnnee','keepBureau','keepUtilisateur','freeCodeMat'].forEach(id => { document.getElementById(id).checked = false; });
+  openModal('addBienModal');
+  document.getElementById('newCodeMat').focus();
+}
+
+function fillDatalist(id, items) { document.getElementById(id).innerHTML = (items || []).map(i => `<option value="${i}">`).join(''); }
+
+function onCodeMatInput() {
+  const v = document.getElementById('newCodeMat').value.toUpperCase();
+  document.getElementById('newCodeMat').value = v;
+  const free = document.getElementById('freeCodeMat').checked;
+  if (!free && v.length > 6) document.getElementById('newCodeMat').value = v.substring(0, 6);
+  if (v.length === 6 && !free) {
+    const des = DB.nomenclature[v];
+    if (des) document.getElementById('newDesignation').value = des;
+    else document.getElementById('newDesignation').value = '';
+    document.getElementById('newType').focus();
+  } else if (!free) { document.getElementById('newDesignation').value = ''; }
+  updateCodePreview();
+}
+
+function onAnneeInput() {
+  const v = document.getElementById('newAnnee').value;
+  if (v.length === 4) document.getElementById('newNumero').focus();
+  updateCodePreview();
+}
+
+function onNumeroInput() {
+  const v = document.getElementById('newNumero').value;
+  const free = document.getElementById('freeCodeMat').checked;
+  if (v.length === 4) {
+    const padded = v.padStart(4, '0');
+    document.getElementById('newNumero').value = padded;
+    updateCodePreview();
+    if (!free) {
+      setTimeout(() => {
+        const code = document.getElementById('codePreview').textContent;
+        if (code !== '—' && DB.biens.some(b => b['CODE MATIERE'] === code)) {
+          document.getElementById('duplicateWarning').style.display = 'block';
+        } else { document.getElementById('duplicateWarning').style.display = 'none'; }
+      }, 100);
+      document.getElementById('newBureau').focus();
+    }
+  } else { updateCodePreview(); }
+}
+
+function updateCodePreview() {
+  const free = document.getElementById('freeCodeMat').checked;
+  const codeMat = document.getElementById('newCodeMat').value;
+  const annee = document.getElementById('newAnnee').value;
+  const numero = (document.getElementById('newNumero').value || '').padStart(4, '0');
+  const direction = document.getElementById('newDirection').value;
+  let preview;
+  if (free) { preview = codeMat || '—'; } 
+  else {
+    if (codeMat.length === 6 && annee && parseInt(annee) > 2020 && numero.length === 4) {
+      const prefix = CODE_PREFIX[direction] || '/23/421.08/11/18/03/';
+      preview = codeMat + prefix + annee + '/' + numero;
+    } else if (codeMat.length === 6 && annee && numero.length === 4) {
+      preview = codeMat + '/' + annee + '/' + numero;
+    } else if (codeMat.length === 6 && numero.length === 4) {
+      preview = codeMat + '/' + numero;
+    } else { preview = '—'; }
+  }
+  document.getElementById('codePreview').textContent = preview;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const freeCheckbox = document.getElementById('freeCodeMat');
+  if (freeCheckbox) {
+    freeCheckbox.addEventListener('change', function() {
+      const codeInput = document.getElementById('newCodeMat');
+      if (this.checked) { codeInput.removeAttribute('maxlength'); }
+      else { codeInput.setAttribute('maxlength', '6'); if (codeInput.value.length > 6) codeInput.value = codeInput.value.substring(0, 6); }
+      updateCodePreview();
+    });
+  }
+});
+
+async function saveNewBien(force = false) {
+  const codeMat = document.getElementById('codePreview').textContent;
+  const free = document.getElementById('freeCodeMat').checked;
+  if (!free && (codeMat === '—' || !codeMat)) {
+    alert('Veuillez compléter la saisie du Numéro (4 caractères) pour générer le code matière.');
+    document.getElementById('newNumero').focus(); return;
+  }
+  const finalCode = free ? document.getElementById('newCodeMat').value : codeMat;
+  if (!finalCode) { alert('Code matière invalide'); return; }
+  if (!force && DB.biens.some(b => b['CODE MATIERE'] === finalCode)) { document.getElementById('duplicateWarning').style.display = 'block'; return; }
+  const bien = {
+    id: 'b_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    direction: document.getElementById('newDirection').value,
+    'CODE MATIERE': finalCode, 'DESIGNATION': document.getElementById('newDesignation').value,
+    'TYPE/MODELE': document.getElementById('newType').value, 'QTE': 1,
+    'ETAT': document.getElementById('newEtat').value, 'FORMAT': document.getElementById('newFormat').value,
+    'ANNEE D\'ACQUISITION': document.getElementById('newAnnee').value,
+    'BUREAU/SERVICE': document.getElementById('newBureau').value,
+    'UTILISATEUR': document.getElementById('newUtilisateur').value,
+    'DIRECTION REGIONALE': document.getElementById('newDirection').value,
+    'DATE INVENTAIRE': document.getElementById('newDateInv').value,
+    checked: false, reforme: false, source: 'saisie'
+  };
+  DB.biens.push(bien); await saveDB();
+  const keepDes = document.getElementById('keepDesignation').checked;
+  const keepAnnee = document.getElementById('keepAnnee').checked;
+  const keepEtat = document.getElementById('keepEtat').checked;
+  const keepFormat = document.getElementById('keepFormat').checked;
+  const keepBureau = document.getElementById('keepBureau').checked;
+  const keepUtilisateur = document.getElementById('keepUtilisateur').checked;
+  if (!keepDes) { document.getElementById('newCodeMat').value = ''; document.getElementById('newCodeMat').readOnly = false; document.getElementById('newDesignation').value = ''; document.getElementById('newType').value = ''; }
+  if (!keepEtat) document.getElementById('newEtat').value = '';
+  if (!keepFormat) document.getElementById('newFormat').value = '';
+  if (!keepAnnee) document.getElementById('newAnnee').value = '';
+  if (!keepBureau) document.getElementById('newBureau').value = '';
+  if (!keepUtilisateur) document.getElementById('newUtilisateur').value = '';
+  document.getElementById('newNumero').value = '';
+  document.getElementById('newDateInv').value = new Date().toISOString().split('T')[0];
+  document.getElementById('duplicateWarning').style.display = 'none';
+  if (keepDes && keepAnnee) document.getElementById('newNumero').focus();
+  else if (keepDes && !keepEtat) document.getElementById('newEtat').focus();
+  else if (keepDes && keepEtat && !keepFormat) document.getElementById('newFormat').focus();
+  else if (!keepDes) document.getElementById('newCodeMat').focus();
+  else if (keepDes && keepEtat && keepFormat && !keepBureau) document.getElementById('newBureau').focus();
+  else if (keepDes && keepEtat && keepFormat && keepBureau && !keepUtilisateur) document.getElementById('newUtilisateur').focus();
+  else document.getElementById('newNumero').focus();
+  updateCodePreview();
+  closeModal('addBienModal');
+  refreshCurrentView(true);
+}
+
+function forceSaveDuplicate() { saveNewBien(true); }
+
+function editBien(id) {
+  const b = DB.biens.find(x => x.id === id);
+  if (!b) return;
+  editingBienId = id;
+  const body = document.getElementById('editBienBody');
+  body.innerHTML = COLONNES.map(c => {
+    if (c === 'ETAT') return `<label>${c}</label><select id="edit_${c}">${['Bon','Passable','En panne','Mauvais','Perdu'].map(e => `<option ${b[c]===e?'selected':''}>${e}</option>`).join('')}</select>`;
+    return `<label>${c}</label><input type="text" id="edit_${c}" value="${b[c]||''}">`;
+  }).join('');
+  openModal('editBienModal');
+}
+
+async function saveEditBien() {
+  const b = DB.biens.find(x => x.id === editingBienId);
+  if (!b) return;
+  COLONNES.forEach(c => { const el = document.getElementById('edit_' + c); if (el) b[c] = el.value; });
+  await saveDB(); closeModal('editBienModal'); refreshCurrentView(true);
+}
+
+async function deleteBien(id, btnElement) {
+  if (!isAdmin()) { alert('⛔ La suppression de biens est réservée aux administrateurs.'); return; }
+  if (!confirm('Supprimer ce bien ?')) return;
+  if (btnElement) {
+    const row = btnElement.closest('tr');
+    if (row) { row.classList.add('row-deleting'); await new Promise(resolve => setTimeout(resolve, 600)); }
+  }
+  DB.biens = DB.biens.filter(x => x.id !== id);
+  await saveDB(); refreshCurrentView(true);
+}
+
+async function deleteAllBiens(direction) {
+  if (!isAdmin()) { alert('⛔ La suppression de tous les biens est réservée aux administrateurs.'); return; }
+  if (!confirm('Supprimer TOUS les biens de ' + direction + ' ?')) return;
+  if (!confirm('Êtes-vous vraiment sûr ?')) return;
+  DB.biens = DB.biens.filter(b => b.direction !== direction);
+  await saveDB(); refreshCurrentView(true);
+}
+
+let importTargetDir = null;
+function openImport(direction) {
+  if (!isAdmin()) { alert('⛔ L\'importation de fichiers Excel est réservée aux administrateurs.'); return; }
+  importTargetDir = direction;
+  document.getElementById('importFile').value = '';
+  document.getElementById('importSheet').innerHTML = '';
+  document.getElementById('importDirection').innerHTML = DIRECTIONS.map(d => `<option ${d===direction?'selected':''}>${d}</option>`).join('');
+  document.getElementById('importFile').onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const data = new Uint8Array(ev.target.result);
+      const wb = XLSX.read(data);
+      document.getElementById('importSheet').innerHTML = wb.SheetNames.map(s => `<option>${s}</option>`).join('');
+    };
+    reader.readAsArrayBuffer(file);
+  };
+  openModal('importModal');
+}
+
+async function processImport() {
+  if (!isAdmin()) { alert('⛔ L\'importation de fichiers Excel est réservée aux administrateurs.'); return; }
+  const file = document.getElementById('importFile').files[0];
+  const sheet = document.getElementById('importSheet').value;
+  const dir = document.getElementById('importDirection').value;
+  if (!file || !sheet) { alert('Sélectionnez fichier et feuille'); return; }
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data);
+      const ws = wb.Sheets[sheet];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      if (rows.length < 2) { alert('Feuille vide'); return; }
+      const headers = rows[0].map(h => String(h||'').toUpperCase().trim());
+      let count = 0;
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || row.length === 0) continue;
+        const bien = { id: 'b_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2,5), direction: dir, checked: false, reforme: false, source: 'import' };
+        COLONNES.forEach((c, idx) => { const hIdx = headers.findIndex(h => h.includes(c.substring(0, 6))); bien[c] = hIdx >= 0 ? (row[hIdx]||'') : (row[idx]||''); });
+        if (!bien['DIRECTION REGIONALE']) bien['DIRECTION REGIONALE'] = dir;
+        if (!bien['DATE INVENTAIRE']) bien['DATE INVENTAIRE'] = new Date().toISOString().split('T')[0];
+        DB.biens.push(bien); count++;
+      }
+      await saveDB(); closeModal('importModal'); refreshCurrentView(true);
+      alert(count + ' bien(s) importé(s) !');
+    } catch(err) { alert('Erreur : ' + err.message); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function exportSynthese(direction, onlyChecked) {
+  let biens = DB.biens.filter(b => b.direction === direction && !b.reforme);
+  if (onlyChecked !== null) biens = biens.filter(b => b.checked === onlyChecked);
+  const synth = {};
+  biens.forEach(b => {
+    const c = (b['CODE MATIERE']||'').substring(0,6);
+    if (!c) return;
+    if (!synth[c]) synth[c] = { code: c, designation: b['DESIGNATION']||'', Bon:0, Passable:0, 'En panne':0, Mauvais:0, total:0 };
+    const e = b['ETAT']||'';
+    if (synth[c][e] !== undefined) synth[c][e]++;
+    synth[c].total++;
+  });
+  const rows = [['Code','Désignation','Bon','Passable','En panne','Mauvais','Total']];
+  Object.values(synth).forEach(r => rows.push([r.code, r.designation, r.Bon, r.Passable, r['En panne'], r.Mauvais, r.total]));
+  downloadExcel(rows, 'Synthese_' + direction.replace(/\s/g, '_'));
+}
+
+function exportGeneralSynthese() {
+  const biens = DB.biens.filter(b => !b.reforme);
+  const synth = {};
+  biens.forEach(b => {
+    const c = (b['CODE MATIERE']||'').substring(0,6);
+    if (!c) return;
+    if (!synth[c]) synth[c] = { code: c, designation: b['DESIGNATION']||'', Bon:0, Passable:0, 'En panne':0, Mauvais:0, total:0 };
+    const e = b['ETAT']||'';
+    if (synth[c][e] !== undefined) synth[c][e]++;
+    synth[c].total++;
+  });
+  const rows = [['Code','Désignation','Bon','Passable','En panne','Mauvais','Total']];
+  Object.values(synth).forEach(r => rows.push([r.code, r.designation, r.Bon, r.Passable, r['En panne'], r.Mauvais, r.total]));
+  downloadExcel(rows, 'Synthese_Generale');
+}
+
+function exportReformes(direction) {
+  const biens = DB.biens.filter(b => b.direction === direction && b.reforme);
+  const rows = [COLONNES];
+  biens.forEach(b => rows.push(COLONNES.map(c => b[c]||'')));
+  downloadExcel(rows, 'Reformes_' + direction.replace(/\s/g, '_'));
+}
+
+function downloadExcel(rows, filename) {
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:11},{wch:20},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8}];
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let C = range.s.c; C <= range.e.c; ++C) {
+    const address = XLSX.utils.encode_col(C) + "1";
+    if (!ws[address]) continue;
+    ws[address].s = { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "1E3A8A" } }, alignment: { horizontal: "center" }, border: { top: {style:"thin"}, bottom: {style:"thin"}, left: {style:"thin"}, right: {style:"thin"} } };
+  }
+  XLSX.utils.book_append_sheet(wb, ws, 'Synthèse');
+  XLSX.writeFile(wb, filename + '.xlsx');
+}
+
+function exportAllData() {
+  const data = JSON.stringify(DB);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'patrimoine_backup_' + new Date().toISOString().split('T')[0] + '.json';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+async function importAllData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!confirm('Cela remplacera TOUTES les données actuelles. Continuer ?')) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || !data.biens) throw new Error('Fichier invalide');
+      DB = data; await saveDB(); alert('Données importées avec succès !'); location.reload();
+    } catch(err) { alert('Fichier invalide : ' + err.message); }
+  };
+  reader.readAsText(file);
+}
+
+async function changePassword() {
+  const oldP = document.getElementById('oldPass').value;
+  const n1 = document.getElementById('newPass1').value;
+  const n2 = document.getElementById('newPass2').value;
+  const user = DB.users.find(u => u.username === DB.currentUser.username);
+  if (user.password !== oldP) { alert('Ancien mot de passe incorrect'); return; }
+  if (n1 !== n2) { alert('Les mots de passe ne correspondent pas'); return; }
+  if (n1.length < 3) { alert('Mot de passe trop court'); return; }
+  user.password = n1;
+  await saveDB(); closeModal('passwordModal'); alert('Mot de passe modifié !');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); makeDraggable(document.getElementById(id).querySelector('.modal')); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function makeDraggable(el) {
+  if (!el || el.dataset.draggable) return;
+  el.dataset.draggable = '1';
+  const header = el.querySelector('.modal-header');
+  let offsetX = 0, offsetY = 0, isDown = false;
+  header.addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    isDown = true;
+    const rect = el.getBoundingClientRect();
+    offsetX = e.clientX - rect.left; offsetY = e.clientY - rect.top;
+    el.style.position = 'fixed';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    el.style.left = (e.clientX - offsetX) + 'px'; el.style.top = (e.clientY - offsetY) + 'px'; el.style.margin = '0';
+  });
+  document.addEventListener('mouseup', () => { isDown = false; });
+}
+
+document.addEventListener('click', e => { if (e.target.classList.contains('modal-overlay')) e.stopPropagation(); }, true);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const anyModalOpen = document.querySelector('.modal-overlay.show');
+    if (!anyModalOpen) {
+      document.querySelectorAll('.search-bar input').forEach(i => i.value = '');
+      document.querySelectorAll('[data-biens]').forEach(c => filterTable(c.id));
+    }
+  }
+});
+
+(async function start() {
+  try {
+    await openIDB();
+    await loadFromIDB();
+    
+    // Initialiser Supabase de manière sécurisée avec vos identifiants
+    initSupabase();
+    
+    // Si connecté, tenter de récupérer les dernières données du cloud
+    if (supabase) {
+      await loadFromSupabase();
+    }
+    
+    // Vérifier si une session est déjà active
+    const savedUser = sessionStorage.getItem('infpe_current_user');
+    if (savedUser) {
+      DB.currentUser = JSON.parse(savedUser);
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('currentUserDisplay').textContent = '👤 ' + DB.currentUser.prenom + ' ' + DB.currentUser.nom + ' (' + DB.currentUser.type + ')';
+      initApp();
+    }
+  } catch(e) {
+    console.error('Erreur de démarrage :', e);
+    alert('Erreur de démarrage. Vérifiez votre connexion Internet et rechargez la page.');
+  }
+})();
+</script>
+</body>
+</html>
