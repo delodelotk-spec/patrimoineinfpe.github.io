@@ -11,7 +11,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; background: var(--bg); color: #1a202c; }
 
-/* ===== INFOBULES : 13pt, fond bleu clair, élargies, sans pointillés ===== */
 [data-tooltip] { position: relative; cursor: help; }
 [data-tooltip]:hover::after {
   content: attr(data-tooltip);
@@ -55,7 +54,7 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; background:
 .login-box button { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; margin-top: 10px; font-weight: bold; }
 .login-box button:hover { background: var(--primary-light); }
 
-#appHeader { background: var(--primary); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+#appHeader { background: var(--primary); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); flex-wrap: wrap; }
 #appHeader h1 { font-size: 16px; }
 #appHeader .user-info { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 #appHeader button { background: var(--primary-light); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; }
@@ -65,6 +64,7 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; background:
 .tab-btn { padding: 10px 14px; background: transparent; border: none; cursor: pointer; font-size: 12px; color: var(--primary); border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s; }
 .tab-btn:hover { background: #e0e7ff; }
 .tab-btn.active { background: var(--primary); color: white; border-bottom: 3px solid var(--warning); font-weight: bold; }
+.tab-btn .badge { background: var(--danger); color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 4px; }
 
 #contentArea { padding: 15px; height: calc(100vh - 110px); overflow: auto; position: relative; border-top: 4px solid transparent; }
 @keyframes slideRight { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -97,6 +97,8 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
 .btn-info { background: var(--info); padding: 8px 16px; }
 .btn-export { background: #059669; padding: 6px 12px; }
 .btn-doublons { background: #dc2626; padding: 6px 12px; }
+.btn-message { background: #25d366; padding: 6px 12px; }
+.btn-whatsapp { background: #128c7e; padding: 6px 12px; }
 .btn-close-modal { background: #6b7280; padding: 8px 16px; }
 .btn:hover { opacity: 0.85; }
 
@@ -121,8 +123,9 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
 @media (max-width: 900px) { .form-line { grid-template-columns: repeat(2, 1fr); } }
 .modal-body label { display: block; margin-top: 10px; color: var(--primary); font-weight: bold; font-size: 12px; }
 .modal-body input, .modal-body select, .modal-body textarea { width: 100%; padding: 8px; margin-top: 4px; border: 2px solid var(--primary); border-radius: 4px; font-size: 12px; background: white; }
-.modal-body input:focus, .modal-body select:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
-.modal-footer { padding: 15px 20px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 10px; }
+.modal-body textarea { min-height: 100px; resize: vertical; }
+.modal-body input:focus, .modal-body select:focus, .modal-body textarea:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+.modal-footer { padding: 15px 20px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
 
 .checkbox-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
 .checkbox-grid label { display: flex; align-items: center; gap: 5px; padding: 6px 10px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer; font-size: 12px; }
@@ -164,7 +167,6 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
 @keyframes deleteRow { 0% { background-color: #fee2e2; opacity: 1; } 100% { background-color: transparent; opacity: 0; } }
 .row-deleting { animation: deleteRow 0.6s ease forwards; }
 
-/* ===== RÉSUMÉ ===== */
 .resume-container { padding: 10px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; }
 .resume-select {
   width: 100%; max-width: 100%; padding: 10px 12px;
@@ -192,7 +194,6 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
   .resume-select { font-size: 13px; padding: 8px 10px; }
 }
 
-/* ===== MODAL DÉTAILS LARGE ===== */
 #detailsModal .modal { width: 98vw; max-width: 1400px; }
 .details-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: auto; }
 .details-table th { background: var(--primary); color: white; padding: 8px 6px; border: 1px solid black; text-align: left; font-size: 11px; white-space: nowrap; }
@@ -203,6 +204,63 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
 .synthese-cell:hover { background: #bfdbfe !important; font-weight: bold; }
 
 .supabase-config { background: #eff6ff; border: 2px solid var(--primary-light); border-radius: 8px; padding: 15px; margin: 10px 0; }
+
+.password-verify-box { background: #fef3c7; border: 2px solid var(--warning); border-radius: 6px; padding: 15px; margin-bottom: 15px; }
+.password-verify-box h4 { color: var(--warning); margin-bottom: 10px; font-size: 14px; }
+.password-verify-box input { width: 100%; padding: 8px; margin: 5px 0; border: 2px solid var(--primary); border-radius: 4px; font-size: 12px; }
+.password-error { color: var(--danger); font-weight: bold; margin-top: 10px; display: none; }
+
+/* ===== STYLES MESSAGES ===== */
+.messages-container { display: grid; grid-template-columns: 280px 1fr; gap: 15px; height: calc(100vh - 200px); }
+@media (max-width: 768px) { .messages-container { grid-template-columns: 1fr; height: auto; } }
+.messages-sidebar { background: white; border: 2px solid var(--primary); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; max-height: calc(100vh - 200px); }
+.messages-sidebar-header { background: var(--primary); color: white; padding: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+.messages-list { overflow-y: auto; flex: 1; }
+.message-item { padding: 10px; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: background 0.2s; }
+.message-item:hover { background: #dbeafe; }
+.message-item.active { background: #bfdbfe; border-left: 4px solid var(--primary); }
+.message-item .msg-from { font-weight: bold; color: var(--primary); font-size: 11px; }
+.message-item .msg-subject { font-size: 11px; color: #6b7280; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.message-item .msg-date { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+.message-item.unread { background: #eff6ff; }
+.message-item.unread .msg-from { color: var(--danger); }
+
+.messages-main { background: white; border: 2px solid var(--primary); border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; max-height: calc(100vh - 200px); }
+.messages-main-header { background: var(--primary); color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; }
+.messages-main-body { flex: 1; overflow-y: auto; padding: 15px; }
+.messages-main-footer { padding: 10px; border-top: 1px solid #e5e7eb; background: #f9fafb; }
+
+.message-thread { margin-bottom: 15px; }
+.message-bubble { padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; max-width: 80%; position: relative; }
+.message-bubble.sent { background: #dbeafe; margin-left: auto; border: 1px solid #93c5fd; }
+.message-bubble.received { background: #f3f4f6; border: 1px solid #d1d5db; }
+.message-bubble .msg-author { font-weight: bold; color: var(--primary); font-size: 11px; margin-bottom: 4px; }
+.message-bubble .msg-content { font-size: 12px; line-height: 1.4; word-wrap: break-word; }
+.message-bubble .msg-meta { font-size: 10px; color: #6b7280; margin-top: 4px; }
+.message-bubble .msg-file { margin-top: 6px; padding: 6px; background: white; border-radius: 4px; border: 1px solid #d1d5db; font-size: 11px; }
+.message-bubble .msg-file a { color: var(--primary); text-decoration: none; font-weight: bold; }
+.message-bubble .msg-file a:hover { text-decoration: underline; }
+.message-bubble .delete-msg-btn { position: absolute; top: 5px; right: 5px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; opacity: 0.7; }
+.message-bubble .delete-msg-btn:hover { opacity: 1; }
+
+.reply-actions { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+.reply-actions button { font-size: 10px; padding: 3px 8px; }
+
+.compose-form { display: flex; flex-direction: column; gap: 8px; }
+.compose-form input, .compose-form select, .compose-form textarea { width: 100%; padding: 8px; border: 2px solid var(--primary); border-radius: 4px; font-size: 12px; }
+.compose-form textarea { min-height: 80px; resize: vertical; }
+
+.whatsapp-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.whatsapp-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; }
+.whatsapp-item .wa-name { font-weight: bold; color: #166534; }
+.whatsapp-item .wa-number { color: #15803d; font-family: monospace; }
+.whatsapp-item a { background: #25d366; color: white; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 11px; }
+.whatsapp-item a:hover { background: #128c7e; }
+
+.empty-messages { text-align: center; padding: 40px; color: #6b7280; }
+.empty-messages .icon { font-size: 48px; margin-bottom: 10px; }
+
+.notification-dot { display: inline-block; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; margin-left: 5px; }
 </style>
 </head>
 <body>
@@ -226,7 +284,7 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
 
 <div id="app" style="display:none;">
   <div id="appHeader">
-    <h1>🏛️ INFPE - Gestion du Patrimoine (Version 10 Go)</h1>
+    <h1>🏛️ INFPE - Gestion du Patrimoine</h1>
     <div class="user-info">
       <span id="currentUserDisplay"></span>
       <span id="supabaseStatus"></span>
@@ -291,7 +349,6 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
   </div>
 </div>
 
-<!-- MODAL EDIT -->
 <div class="modal-overlay" id="editBienModal">
   <div class="modal" style="width:700px;">
     <div class="modal-header"><h3>✏️ Modifier le bien</h3><button class="modal-close" onclick="closeModal('editBienModal')">×</button></div>
@@ -303,7 +360,6 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
   </div>
 </div>
 
-<!-- MODAL PASSWORD -->
 <div class="modal-overlay" id="passwordModal">
   <div class="modal" style="width:400px;">
     <div class="modal-header"><h3>🔑 Changer le mot de passe</h3><button class="modal-close" onclick="closeModal('passwordModal')">×</button></div>
@@ -316,13 +372,12 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
   </div>
 </div>
 
-<!-- MODAL CLOUD -->
 <div class="modal-overlay" id="cloudModal">
   <div class="modal" style="width:700px; max-height:80vh; overflow:auto;">
-    <div class="modal-header"><h3>☁️ Synchronisation Cloud (Netlify + Supabase)</h3><button class="modal-close" onclick="closeModal('cloudModal')">×</button></div>
+    <div class="modal-header"><h3>☁️ Synchronisation Cloud</h3><button class="modal-close" onclick="closeModal('cloudModal')">×</button></div>
     <div class="modal-body">
       <div style="padding:15px; background:#fef3c7; border:2px solid var(--warning); border-radius:6px; margin-bottom:15px; font-size:12px;">
-        <b>📌 Important :</b> Netlify est un hébergeur statique. Pour que les données soient accessibles depuis n'importe quel ordinateur, configurez Supabase ci-dessous. La synchronisation est automatique et perpétuelle.
+        <b>📌 Important :</b> Configurez Supabase pour la synchronisation automatique.
       </div>
       <div class="supabase-config">
         <h4 style="color:var(--primary); margin-bottom:10px; font-size:14px;">⚙️ Configuration Supabase</h4>
@@ -338,13 +393,12 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
         <button class="btn btn-primary" onclick="exportAllData()" style="width:100%; margin-bottom:10px;">📥 Exporter toutes les données (JSON)</button>
         <label class="btn btn-success" style="width:100%; text-align:center; display:block; margin-bottom:10px;">📤 Importer des données (JSON)<input type="file" accept=".json" onchange="importAllData(event)" style="display:none;"></label>
         <button class="btn btn-edit" onclick="exportExcelPatrimoine()" style="width:100%; margin-bottom:10px;">📊 Exporter vers Excel "Patrimoine.xlsx"</button>
-        <button class="btn btn-info" onclick="syncToSupabase()" style="width:100%;">🔄 Synchroniser avec Supabase maintenant</button>
+        <button class="btn btn-info" onclick="syncToSupabase()" style="width:100%;">🔄 Synchroniser maintenant</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL USER -->
 <div class="modal-overlay" id="userModal">
   <div class="modal" style="width:700px;">
     <div class="modal-header"><h3>👤 Gestion des utilisateurs</h3><button class="modal-close" onclick="closeModal('userModal')">×</button></div>
@@ -352,7 +406,6 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
   </div>
 </div>
 
-<!-- MODAL IMPORT -->
 <div class="modal-overlay" id="importModal">
   <div class="modal" style="width:500px;">
     <div class="modal-header"><h3>📥 Importer un fichier Excel</h3><button class="modal-close" onclick="closeModal('importModal')">×</button></div>
@@ -365,18 +418,101 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
   </div>
 </div>
 
-<!-- MODAL DÉTAILS -->
 <div class="modal-overlay" id="detailsModal">
   <div class="modal">
     <div class="modal-header">
       <h3 id="detailsModalTitle">📋 Détails</h3>
       <button class="modal-close" onclick="closeModal('detailsModal')">×</button>
     </div>
+    <div class="modal-body"><div id="detailsContent"></div></div>
+    <div class="modal-footer"><button class="btn btn-close-modal" onclick="closeModal('detailsModal')">Fermer</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="passwordVerifyModal">
+  <div class="modal" style="width:450px;">
+    <div class="modal-header">
+      <h3>🔐 Vérification de sécurité</h3>
+      <button class="modal-close" onclick="closeModal('passwordVerifyModal')">×</button>
+    </div>
     <div class="modal-body">
-      <div id="detailsContent"></div>
+      <div class="password-verify-box">
+        <h4>⚠️ Action sensible - Double authentification requise</h4>
+        <p style="font-size:12px; margin-bottom:10px;">Saisissez les deux mots de passe de sécurité :</p>
+        <label style="font-weight:bold; color:var(--primary);">Premier mot de passe :</label>
+        <input type="password" id="verifyPass1" placeholder="Mot de passe 1" autocomplete="off">
+        <label style="font-weight:bold; color:var(--primary); margin-top:10px;">Second mot de passe :</label>
+        <input type="password" id="verifyPass2" placeholder="Mot de passe 2" autocomplete="off">
+        <div id="passwordVerifyError" class="password-error">❌ Mots de passe incorrects !</div>
+      </div>
+      <p id="passwordVerifyAction" style="font-size:12px; color:#6b7280; margin-top:10px;"></p>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-close-modal" onclick="closeModal('detailsModal')">Fermer</button>
+      <button class="btn btn-primary" onclick="confirmPasswordVerify()">✅ Confirmer</button>
+      <button class="btn btn-close-modal" onclick="closeModal('passwordVerifyModal')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="composeMessageModal">
+  <div class="modal" style="width:700px;">
+    <div class="modal-header">
+      <h3>✉️ Nouveau message</h3>
+      <button class="modal-close" onclick="closeModal('composeMessageModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <label>Destinataire</label>
+      <select id="msgTo"><option value="__all__">📢 Tous les utilisateurs</option></select>
+      <label style="margin-top:10px;">Sujet</label>
+      <input type="text" id="msgSubject" placeholder="Objet du message">
+      <label style="margin-top:10px;">Message</label>
+      <textarea id="msgContent" placeholder="Votre message..."></textarea>
+      <label style="margin-top:10px;">📎 Joindre un fichier (max 5 Mo)</label>
+      <input type="file" id="msgFile">
+      <div id="msgFileInfo" style="font-size:11px; color:#6b7280; margin-top:5px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="sendMessage()">📤 Envoyer</button>
+      <button class="btn btn-close-modal" onclick="closeModal('composeMessageModal')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="replyMessageModal">
+  <div class="modal" style="width:600px;">
+    <div class="modal-header">
+      <h3>↩️ Répondre au message</h3>
+      <button class="modal-close" onclick="closeModal('replyMessageModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="replyOriginalMessage" style="padding:10px; background:#f3f4f6; border-left:4px solid var(--primary); margin-bottom:10px; font-size:11px;"></div>
+      <label>Type de réponse</label>
+      <select id="replyType">
+        <option value="public">📢 Réponse publique (visible par tous)</option>
+        <option value="private">🔒 Réponse privée (visible uniquement par l'expéditeur)</option>
+      </select>
+      <label style="margin-top:10px;">Votre réponse</label>
+      <textarea id="replyContent" placeholder="Votre réponse..."></textarea>
+      <label style="margin-top:10px;">📎 Joindre un fichier (max 5 Mo)</label>
+      <input type="file" id="replyFile">
+      <div id="replyFileInfo" style="font-size:11px; color:#6b7280; margin-top:5px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="sendReply()">📤 Envoyer la réponse</button>
+      <button class="btn btn-close-modal" onclick="closeModal('replyMessageModal')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="whatsappModal">
+  <div class="modal" style="width:600px;">
+    <div class="modal-header">
+      <h3>📱 Contacts WhatsApp Web</h3>
+      <button class="modal-close" onclick="closeModal('whatsappModal')">×</button>
+    </div>
+    <div class="modal-body" id="whatsappContent"></div>
+    <div class="modal-footer">
+      <button class="btn btn-close-modal" onclick="closeModal('whatsappModal')">Fermer</button>
     </div>
   </div>
 </div>
@@ -413,18 +549,23 @@ const CODE_PREFIX = {
 
 const COLONNES = ["CODE MATIERE", "DESIGNATION", "TYPE/MODELE", "QTE", "ETAT", "FORMAT", "ANNEE D'ACQUISITION", "BUREAU/SERVICE", "UTILISATEUR", "DIRECTION REGIONALE", "DATE INVENTAIRE"];
 
-let DB = { biens: [], users: [], currentUser: null, nomenclature: {}, personnel: [], services: [], modeles: [], logo: null, actions: [] };
+let DB = { biens: [], users: [], currentUser: null, nomenclature: {}, personnel: [], services: [], modeles: [], logo: null, actions: [], messages: [], whatsappContacts: [] };
 let currentTab = 'dashboard';
 let editingBienId = null;
 let supabase = null;
 let syncTimeout = null;
 let paginationState = {};
+let currentMessageThread = null;
 
 const DEFAULT_SUPABASE_URL = 'https://jpzbdhmktvbwzhhmxmaz.supabase.co';
 const DEFAULT_SUPABASE_KEY = 'sb_publishable_JbAgx2R8-dg3Uk-27Tr4Zw_lRFAP-wu';
 const DB_NAME = 'infpe_patrimoine';
 const PAGE_SIZE = 1000;
 let idb = null;
+
+let passwordVerifyCallback = null;
+const SECRET_PASS_1 = 'Kargougou';
+const SECRET_PASS_2 = 'ktibw';
 
 function isAdmin() { return DB.currentUser && DB.currentUser.type === 'Administrateur'; }
 function showLoading(text = 'Veuillez patienter...') { document.getElementById('loadingText').textContent = text; document.getElementById('loadingOverlay').classList.add('show'); }
@@ -433,21 +574,45 @@ function hideLoading() { document.getElementById('loadingOverlay').classList.rem
 function updateStorageIndicator() {
   const size = JSON.stringify(DB).length;
   const mb = (size / (1024 * 1024)).toFixed(2);
-  const gb = (size / (1024 * 1024 * 1024)).toFixed(2);
-  const text = size > 1024 * 1024 * 1024 ? `💾 ${gb} Go` : `💾 ${mb} Mo`;
   const el = document.getElementById('storageIndicator');
-  if (el) el.textContent = text;
+  if (el) el.textContent = `💾 ${mb} Mo`;
+}
+
+function requestPasswordVerification(actionDescription, callback) {
+  passwordVerifyCallback = callback;
+  document.getElementById('verifyPass1').value = '';
+  document.getElementById('verifyPass2').value = '';
+  document.getElementById('passwordVerifyError').style.display = 'none';
+  document.getElementById('passwordVerifyAction').textContent = `Action : ${actionDescription}`;
+  openModal('passwordVerifyModal');
+  setTimeout(() => document.getElementById('verifyPass1').focus(), 100);
+}
+
+function confirmPasswordVerify() {
+  const pass1 = document.getElementById('verifyPass1').value;
+  const pass2 = document.getElementById('verifyPass2').value;
+  if (pass1 === SECRET_PASS_1 && pass2 === SECRET_PASS_2) {
+    closeModal('passwordVerifyModal');
+    if (passwordVerifyCallback) { passwordVerifyCallback(); passwordVerifyCallback = null; }
+  } else {
+    document.getElementById('passwordVerifyError').style.display = 'block';
+    document.getElementById('verifyPass1').value = '';
+    document.getElementById('verifyPass2').value = '';
+    document.getElementById('verifyPass1').focus();
+  }
 }
 
 function openIDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 2);
+    const req = indexedDB.open(DB_NAME, 3);
     req.onupgradeneeded = e => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('biens')) db.createObjectStore('biens', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('users')) db.createObjectStore('users', { keyPath: 'username' });
       if (!db.objectStoreNames.contains('refs')) db.createObjectStore('refs', { keyPath: 'key' });
       if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'key' });
+      if (!db.objectStoreNames.contains('messages')) db.createObjectStore('messages', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains('whatsapp')) db.createObjectStore('whatsapp', { keyPath: 'id', autoIncrement: true });
     };
     req.onsuccess = e => { idb = e.target.result; resolve(idb); };
     req.onerror = e => reject(e);
@@ -456,12 +621,15 @@ function openIDB() {
 
 async function loadFromIDB() {
   try {
-    const tx = idb.transaction(['biens', 'users', 'refs', 'settings'], 'readonly');
+    const tx = idb.transaction(['biens', 'users', 'refs', 'settings', 'messages', 'whatsapp'], 'readonly');
     const biens = await new Promise(r => { const req = tx.objectStore('biens').getAll(); req.onsuccess = () => r(req.result); });
     const users = await new Promise(r => { const req = tx.objectStore('users').getAll(); req.onsuccess = () => r(req.result); });
     const refs = await new Promise(r => { const req = tx.objectStore('refs').getAll(); req.onsuccess = () => r(req.result); });
     const settings = await new Promise(r => { const req = tx.objectStore('settings').getAll(); req.onsuccess = () => r(req.result); });
-    DB.biens = biens || []; DB.users = users || [];
+    let messages = [], whatsapp = [];
+    if (tx.objectStoreNames.contains('messages')) messages = await new Promise(r => { const req = tx.objectStore('messages').getAll(); req.onsuccess = () => r(req.result || []); });
+    if (tx.objectStoreNames.contains('whatsapp')) whatsapp = await new Promise(r => { const req = tx.objectStore('whatsapp').getAll(); req.onsuccess = () => r(req.result || []); });
+    DB.biens = biens || []; DB.users = users || []; DB.messages = messages; DB.whatsappContacts = whatsapp;
     refs.forEach(r => {
       if (r.key === 'nomenclature') DB.nomenclature = r.value || {};
       else if (r.key === 'personnel') DB.personnel = r.value || [];
@@ -480,7 +648,7 @@ async function loadFromIDB() {
 
 async function saveDB() {
   try {
-    const tx = idb.transaction(['biens', 'users', 'refs', 'settings'], 'readwrite');
+    const tx = idb.transaction(['biens', 'users', 'refs', 'settings', 'messages', 'whatsapp'], 'readwrite');
     const bs = tx.objectStore('biens'); bs.clear(); DB.biens.forEach(b => bs.put(b));
     const us = tx.objectStore('users'); us.clear(); DB.users.forEach(u => us.put(u));
     const rs = tx.objectStore('refs');
@@ -490,6 +658,8 @@ async function saveDB() {
     rs.put({ key: 'modeles', value: DB.modeles });
     const ss = tx.objectStore('settings');
     if (DB.logo) ss.put({ key: 'logo', value: DB.logo });
+    const ms = tx.objectStore('messages'); ms.clear(); DB.messages.forEach(m => ms.put(m));
+    const ws = tx.objectStore('whatsapp'); ws.clear(); DB.whatsappContacts.forEach(w => ws.put(w));
     await new Promise((resolve, reject) => { tx.oncomplete = () => resolve(); tx.onerror = e => reject(e); });
     updateStorageIndicator();
     if (supabase) triggerBackgroundSync();
@@ -516,6 +686,12 @@ async function syncToSupabaseBackground() {
     ];
     for (const ref of refsToSync) await supabase.from('refs').upsert(ref, { onConflict: 'key' });
     if (DB.logo) await supabase.from('settings').upsert({ key: 'logo', value: DB.logo }, { onConflict: 'key' });
+    if (DB.messages.length > 0) {
+      for (let i = 0; i < DB.messages.length; i += batchSize) {
+        const batch = DB.messages.slice(i, i + batchSize);
+        await supabase.from('messages').upsert(batch, { onConflict: 'id' });
+      }
+    }
     updateSupabaseStatus(true);
   } catch(e) { console.warn('⚠️ Erreur de synchronisation:', e.message); updateSupabaseStatus(false); }
 }
@@ -525,9 +701,7 @@ async function loadFromSupabase() {
   try {
     showLoading('Chargement depuis le cloud...');
     let allBiens = [];
-    let from = 0;
-    let to = PAGE_SIZE - 1;
-    let hasMore = true;
+    let from = 0, to = PAGE_SIZE - 1, hasMore = true;
     while (hasMore) {
       const { data: biens, error: errBiens } = await supabase.from('biens').select('*').range(from, to);
       if (errBiens) throw errBiens;
@@ -538,10 +712,10 @@ async function loadFromSupabase() {
       } else { hasMore = false; }
     }
     if (allBiens.length > 0) DB.biens = allBiens;
-    const { data: users, error: errUsers } = await supabase.from('users').select('*');
-    if (!errUsers && users && users.length > 0) DB.users = users;
-    const { data: refs, error: errRefs } = await supabase.from('refs').select('*');
-    if (!errRefs && refs && refs.length > 0) {
+    const { data: users } = await supabase.from('users').select('*');
+    if (users && users.length > 0) DB.users = users;
+    const { data: refs } = await supabase.from('refs').select('*');
+    if (refs && refs.length > 0) {
       refs.forEach(r => {
         if (r.key === 'nomenclature') DB.nomenclature = r.value || {};
         else if (r.key === 'personnel') DB.personnel = r.value || [];
@@ -549,8 +723,10 @@ async function loadFromSupabase() {
         else if (r.key === 'modeles') DB.modeles = r.value || [];
       });
     }
-    const { data: settings, error: errSettings } = await supabase.from('settings').select('*');
-    if (!errSettings && settings && settings.length > 0) settings.forEach(s => { if (s.key === 'logo') DB.logo = s.value; });
+    const { data: settings } = await supabase.from('settings').select('*');
+    if (settings && settings.length > 0) settings.forEach(s => { if (s.key === 'logo') DB.logo = s.value; });
+    const { data: messages } = await supabase.from('messages').select('*');
+    if (messages && messages.length > 0) DB.messages = messages;
     await saveDB();
     hideLoading();
     return true;
@@ -588,7 +764,7 @@ function doLogout() {
 }
 
 function initSupabase() {
-  if (typeof window.supabase === 'undefined') { console.error('❌ La bibliothèque Supabase ne s\'est pas chargée.'); updateSupabaseStatus(false); return false; }
+  if (typeof window.supabase === 'undefined') { updateSupabaseStatus(false); return false; }
   const url = localStorage.getItem('supabase_url') || DEFAULT_SUPABASE_URL;
   const key = localStorage.getItem('supabase_key') || DEFAULT_SUPABASE_KEY;
   if (url && key && !url.includes('VOTRE_URL')) {
@@ -617,7 +793,7 @@ async function testAndSaveSupabase() {
     localStorage.setItem('supabase_key', key);
     supabase = testClient;
     updateSupabaseStatus(true);
-    resultDiv.innerHTML = '<span style="color:#10b981;">✅ Connexion réussie ! Synchronisation perpétuelle activée.</span>';
+    resultDiv.innerHTML = '<span style="color:#10b981;">✅ Connexion réussie !</span>';
     setTimeout(() => { resultDiv.innerHTML = ''; }, 3000);
   } catch(e) { resultDiv.innerHTML = `<span style="color:red;">❌ Erreur : ${e.message}</span>`; }
 }
@@ -630,11 +806,20 @@ function autoFillSupabase() {
 async function syncToSupabase() {
   if (!supabase) { alert('Supabase n\'est pas configuré.'); return; }
   showLoading('Synchronisation en cours...');
-  try { await syncToSupabaseBackground(); hideLoading(); alert('✅ Synchronisation manuelle réussie !'); } 
+  try { await syncToSupabaseBackground(); hideLoading(); alert('✅ Synchronisation réussie !'); } 
   catch(e) { hideLoading(); alert('❌ Erreur : ' + e.message); }
 }
 
 async function initApp() { initSupabase(); buildTabs(); showTab('dashboard'); }
+
+function getUnreadMessagesCount() {
+  if (!DB.currentUser) return 0;
+  return DB.messages.filter(m => {
+    if (m.to_user !== '__all__' && m.to_user !== DB.currentUser.username) return false;
+    if (m.read_by && m.read_by.includes(DB.currentUser.username)) return false;
+    return true;
+  }).length;
+}
 
 function buildTabs() {
   const container = document.getElementById('tabsContainer');
@@ -644,8 +829,10 @@ function buildTabs() {
   const allowedDirs = user.directions || DIRECTIONS;
   const admin = isAdmin();
   addTabBtn(container, 'dashboard', '📊 Tableau de bord', 'Vue d\'ensemble');
-  addTabBtn(container, 'resume', '📋 Résumé', 'Résumé des biens cochés par désignation');
-  addTabBtn(container, 'resumeNonCoches', '📋 Résumé des biens non cochés', 'Résumé des biens non cochés par désignation');
+  addTabBtn(container, 'resume', '📋 Résumé', 'Résumé des biens cochés');
+  addTabBtn(container, 'resumeNonCoches', '📋 Résumé non cochés', 'Résumé des biens non cochés');
+  const unreadCount = getUnreadMessagesCount();
+  addTabBtn(container, 'messages', '💬 Messages' + (unreadCount > 0 ? ` <span class="badge">${unreadCount}</span>` : ''), 'Messagerie interne');
   allowedDirs.forEach(dir => {
     const id = 'dir_' + dir.replace(/[^a-zA-Z0-9]/g, '_');
     const shortName = dir.length > 30 ? dir.substring(0, 28) + '…' : dir;
@@ -657,7 +844,7 @@ function buildTabs() {
 
 function addTabBtn(container, id, label, tooltip) {
   const btn = document.createElement('button');
-  btn.className = 'tab-btn'; btn.dataset.tab = id; btn.textContent = label;
+  btn.className = 'tab-btn'; btn.dataset.tab = id; btn.innerHTML = label;
   if (tooltip) btn.setAttribute('data-tooltip', tooltip);
   btn.onclick = () => showTab(id);
   container.appendChild(btn);
@@ -678,6 +865,7 @@ function showTab(tabId) {
   if (tabId === 'dashboard') renderDashboard();
   else if (tabId === 'resume') renderResume();
   else if (tabId === 'resumeNonCoches') renderResumeNonCoches();
+  else if (tabId === 'messages') renderMessages();
   else if (tabId === 'general') renderGeneralList();
   else if (tabId === 'params') renderParams();
   else if (tabId.startsWith('dir_')) {
@@ -699,6 +887,7 @@ function refreshCurrentView(preserveSearch = true) {
   if (currentTab === 'dashboard') renderDashboard();
   else if (currentTab === 'resume') renderResume();
   else if (currentTab === 'resumeNonCoches') renderResumeNonCoches();
+  else if (currentTab === 'messages') renderMessages();
   else if (currentTab === 'general') renderGeneralList();
   else if (currentTab === 'params') renderParams();
   else if (currentTab.startsWith('dir_')) {
@@ -731,6 +920,7 @@ function renderDashboard() {
   const parDir = {}; biens.forEach(b => { parDir[b.direction] = (parDir[b.direction] || 0) + 1; });
   const sortedDirs = Object.entries(parDir).sort((a,b) => a[1] - b[1]);
   const maxVal = Math.max(...sortedDirs.map(x => x[1]), 1);
+  const unreadCount = getUnreadMessagesCount();
   let html = `
     <div style="display:flex; gap:20px; align-items:center; margin-bottom:20px;">
       ${DB.logo ? `<img src="${DB.logo}" class="logo-display">` : '<div style="width:150px; height:80px; background:#e5e7eb; display:flex; align-items:center; justify-content:center; border-radius:6px;">Logo</div>'}
@@ -740,7 +930,7 @@ function renderDashboard() {
       <div class="stat-card"><h4>📦 Nombre total de biens</h4><div class="value">${totalBiens}</div></div>
       <div class="stat-card"><h4>🏢 Directions actives</h4><div class="value">${nbDirections}</div></div>
       <div class="stat-card"><h4>📊 Par état</h4><div style="font-size:12px; margin-top:5px;">${Object.entries(parEtat).map(([e,n]) => `<div><b>${e}:</b> ${n}</div>`).join('')}</div></div>
-      <div class="stat-card"><h4>💾 Stockage utilisé</h4><div class="value" style="font-size:18px;">${(JSON.stringify(DB).length / (1024 * 1024)).toFixed(2)} Mo</div></div>
+      <div class="stat-card" style="cursor:pointer;" onclick="showTab('messages')"><h4>💬 Messages non lus</h4><div class="value" style="font-size:18px;">${unreadCount}</div></div>
     </div>
     <div class="chart-container">
       <h4 style="color:var(--primary); margin-bottom:15px;">📊 Nombre de biens par direction (du plus petit au plus grand)</h4>
@@ -755,7 +945,7 @@ function renderDashboard() {
   setTimeout(() => { document.querySelectorAll('#dashChart .bar-fill').forEach(bar => { bar.style.height = bar.dataset.target + 'px'; }); }, 100);
 }
 
-// ===== DÉTECTION ET SUPPRESSION DES DOUBLONS =====
+// ===== DOUBLONS =====
 function detecterDoublons(direction) {
   const biens = DB.biens.filter(b => b.direction === direction && !b.reforme);
   const codeCounts = {};
@@ -768,39 +958,31 @@ function detecterDoublons(direction) {
   });
   Object.values(codeCounts).forEach(groupe => {
     if (groupe.length > 1) {
-      // Garder le premier, marquer les autres comme doublons
-      for (let i = 1; i < groupe.length; i++) {
-        doublons.push(groupe[i]);
-      }
+      for (let i = 1; i < groupe.length; i++) doublons.push(groupe[i]);
     }
   });
   return doublons;
 }
 
-async function supprimerDoublonsDirection(direction) {
+function demanderSuppressionDoublonsDirection(direction) {
   const doublons = detecterDoublons(direction);
-  if (doublons.length === 0) {
-    alert(`✅ Aucun doublon trouvé dans "${direction}".`);
-    return;
-  }
-  if (!confirm(`⚠️ ${doublons.length} doublon(s) détecté(s) dans "${direction}".\n\nVoulez-vous les supprimer ?\n(Le premier bien de chaque code matière sera conservé)`)) return;
-  
+  if (doublons.length === 0) { alert(`✅ Aucun doublon dans "${direction}".`); return; }
+  requestPasswordVerification(
+    `Supprimer ${doublons.length} doublon(s) dans "${direction}"`,
+    () => executerSuppressionDoublonsDirection(direction, doublons)
+  );
+}
+
+async function executerSuppressionDoublonsDirection(direction, doublons) {
   const idsADelete = new Set(doublons.map(d => d.id));
   DB.biens = DB.biens.filter(b => !idsADelete.has(b.id));
-  
-  // Enregistrer l'action
-  DB.actions.push({
-    date: new Date().toISOString(),
-    user: DB.currentUser?.username || 'inconnu',
-    action: `Suppression de ${doublons.length} doublon(s) dans ${direction}`
-  });
-  
+  DB.actions.push({ date: new Date().toISOString(), user: DB.currentUser?.username || 'inconnu', action: `Suppression de ${doublons.length} doublon(s) dans ${direction}` });
   await saveDB();
-  alert(`✅ ${doublons.length} doublon(s) supprimé(s) avec succès dans "${direction}".`);
+  alert(`✅ ${doublons.length} doublon(s) supprimé(s) dans "${direction}".`);
   refreshCurrentView(false);
 }
 
-async function supprimerTousDoublons() {
+function demanderSuppressionTousDoublons() {
   const allBiens = DB.biens.filter(b => !b.reforme);
   const codeCounts = {};
   const doublons = [];
@@ -812,94 +994,73 @@ async function supprimerTousDoublons() {
   });
   Object.values(codeCounts).forEach(groupe => {
     if (groupe.length > 1) {
-      for (let i = 1; i < groupe.length; i++) {
-        doublons.push(groupe[i]);
-      }
+      for (let i = 1; i < groupe.length; i++) doublons.push(groupe[i]);
     }
   });
-  
-  if (doublons.length === 0) {
-    alert('✅ Aucun doublon trouvé dans l\'ensemble de la base.');
-    return;
-  }
-  if (!confirm(`⚠️ ${doublons.length} doublon(s) détecté(s) au total.\n\nVoulez-vous les supprimer tous ?\n(Le premier bien de chaque code matière sera conservé)`)) return;
-  
+  if (doublons.length === 0) { alert('✅ Aucun doublon trouvé.'); return; }
+  requestPasswordVerification(
+    `Supprimer TOUS les ${doublons.length} doublons`,
+    () => executerSuppressionTousDoublons(doublons)
+  );
+}
+
+async function executerSuppressionTousDoublons(doublons) {
   const idsADelete = new Set(doublons.map(d => d.id));
   DB.biens = DB.biens.filter(b => !idsADelete.has(b.id));
-  
-  DB.actions.push({
-    date: new Date().toISOString(),
-    user: DB.currentUser?.username || 'inconnu',
-    action: `Suppression globale de ${doublons.length} doublon(s)`
-  });
-  
+  DB.actions.push({ date: new Date().toISOString(), user: DB.currentUser?.username || 'inconnu', action: `Suppression globale de ${doublons.length} doublon(s)` });
   await saveDB();
-  alert(`✅ ${doublons.length} doublon(s) supprimé(s) avec succès.`);
+  alert(`✅ ${doublons.length} doublon(s) supprimé(s).`);
   refreshCurrentView(false);
 }
 
-// ===== FONCTIONS DÉTAILS =====
+function demanderSuppressionTousBiens(direction) {
+  const count = DB.biens.filter(b => b.direction === direction).length;
+  if (count === 0) { alert(`Aucun bien dans "${direction}".`); return; }
+  requestPasswordVerification(
+    `Supprimer TOUS les ${count} biens de "${direction}"`,
+    () => executerSuppressionTousBiens(direction)
+  );
+}
+
+async function executerSuppressionTousBiens(direction) {
+  DB.biens = DB.biens.filter(b => b.direction !== direction);
+  DB.actions.push({ date: new Date().toISOString(), user: DB.currentUser?.username || 'inconnu', action: `Suppression de tous les biens de ${direction}` });
+  await saveDB();
+  alert(`✅ Tous les biens de "${direction}" supprimés.`);
+  refreshCurrentView(false);
+}
+
+// ===== DÉTAILS =====
 function showDesignationDetails(designation, checkedStatus) {
   let biens = DB.biens.filter(b => b['DESIGNATION'] === designation && !b.reforme);
   if (checkedStatus === 'coches') biens = biens.filter(b => b.checked === true);
   else if (checkedStatus === 'nonCoches') biens = biens.filter(b => b.checked !== true);
-  
-  if (biens.length === 0) { alert('Aucun bien trouvé pour cette désignation.'); return; }
-  
+  if (biens.length === 0) { alert('Aucun bien trouvé.'); return; }
   const statusLabel = checkedStatus === 'coches' ? 'cochés' : 'non cochés';
   document.getElementById('detailsModalTitle').textContent = `📋 Détails : ${designation} (${biens.length} bien(s) ${statusLabel})`;
-  
   let html = `<div style="margin-bottom:15px;"><p style="font-size:13px; color:#6b7280;"><b>Total : ${biens.length} bien(s)</b></p></div>
     <div class="table-wrapper" style="max-height:500px;">
       <table class="details-table">
-        <thead><tr>
-          <th>CODE MATIERE</th><th>DESIGNATION</th><th>MODELE</th><th>ETAT</th>
-          <th>FORMAT</th><th>ANNEE</th><th>SERVICE</th><th>UTILISATEUR</th><th>DIRECTION</th>
-        </tr></thead><tbody>`;
-  
+        <thead><tr><th>CODE MATIERE</th><th>DESIGNATION</th><th>MODELE</th><th>ETAT</th><th>FORMAT</th><th>ANNEE</th><th>SERVICE</th><th>UTILISATEUR</th><th>DIRECTION</th></tr></thead><tbody>`;
   biens.forEach(b => {
-    html += `<tr>
-      <td>${b['CODE MATIERE'] || ''}</td><td>${b['DESIGNATION'] || ''}</td>
-      <td>${b['TYPE/MODELE'] || ''}</td><td>${b['ETAT'] || ''}</td>
-      <td>${b['FORMAT'] || ''}</td><td>${b['ANNEE D\'ACQUISITION'] || ''}</td>
-      <td>${b['BUREAU/SERVICE'] || ''}</td><td>${b['UTILISATEUR'] || ''}</td>
-      <td>${b.direction || b['DIRECTION REGIONALE'] || ''}</td>
-    </tr>`;
+    html += `<tr><td>${b['CODE MATIERE']||''}</td><td>${b['DESIGNATION']||''}</td><td>${b['TYPE/MODELE']||''}</td><td>${b['ETAT']||''}</td><td>${b['FORMAT']||''}</td><td>${b['ANNEE D\'ACQUISITION']||''}</td><td>${b['BUREAU/SERVICE']||''}</td><td>${b['UTILISATEUR']||''}</td><td>${b.direction||b['DIRECTION REGIONALE']||''}</td></tr>`;
   });
-  
   html += `</tbody></table></div>`;
   document.getElementById('detailsContent').innerHTML = html;
   openModal('detailsModal');
 }
 
 function showSyntheseDetails(code6) {
-  let biens = DB.biens.filter(b => {
-    const code = (b['CODE MATIERE'] || '').toString().trim();
-    return code.substring(0, 6) === code6 && !b.reforme;
-  });
-  
-  if (biens.length === 0) { alert('Aucun bien trouvé pour ce code matière.'); return; }
-  
-  document.getElementById('detailsModalTitle').textContent = `📋 Détails code matière : ${code6} (${biens.length} bien(s))`;
-  
-  let html = `<div style="margin-bottom:15px;"><p style="font-size:13px; color:#6b7280;"><b>Total : ${biens.length} bien(s) pour le code matière ${code6}</b></p></div>
+  let biens = DB.biens.filter(b => (b['CODE MATIERE']||'').toString().trim().substring(0,6) === code6 && !b.reforme);
+  if (biens.length === 0) { alert('Aucun bien trouvé.'); return; }
+  document.getElementById('detailsModalTitle').textContent = `📋 Code matière : ${code6} (${biens.length} bien(s))`;
+  let html = `<div style="margin-bottom:15px;"><p style="font-size:13px; color:#6b7280;"><b>Total : ${biens.length} bien(s)</b></p></div>
     <div class="table-wrapper" style="max-height:500px;">
       <table class="details-table">
-        <thead><tr>
-          <th>CODE MATIERE</th><th>DESIGNATION</th><th>MODELE</th><th>ETAT</th>
-          <th>FORMAT</th><th>ANNEE</th><th>SERVICE</th><th>UTILISATEUR</th><th>DIRECTION</th>
-        </tr></thead><tbody>`;
-  
+        <thead><tr><th>CODE MATIERE</th><th>DESIGNATION</th><th>MODELE</th><th>ETAT</th><th>FORMAT</th><th>ANNEE</th><th>SERVICE</th><th>UTILISATEUR</th><th>DIRECTION</th></tr></thead><tbody>`;
   biens.forEach(b => {
-    html += `<tr>
-      <td>${b['CODE MATIERE'] || ''}</td><td>${b['DESIGNATION'] || ''}</td>
-      <td>${b['TYPE/MODELE'] || ''}</td><td>${b['ETAT'] || ''}</td>
-      <td>${b['FORMAT'] || ''}</td><td>${b['ANNEE D\'ACQUISITION'] || ''}</td>
-      <td>${b['BUREAU/SERVICE'] || ''}</td><td>${b['UTILISATEUR'] || ''}</td>
-      <td>${b.direction || b['DIRECTION REGIONALE'] || ''}</td>
-    </tr>`;
+    html += `<tr><td>${b['CODE MATIERE']||''}</td><td>${b['DESIGNATION']||''}</td><td>${b['TYPE/MODELE']||''}</td><td>${b['ETAT']||''}</td><td>${b['FORMAT']||''}</td><td>${b['ANNEE D\'ACQUISITION']||''}</td><td>${b['BUREAU/SERVICE']||''}</td><td>${b['UTILISATEUR']||''}</td><td>${b.direction||b['DIRECTION REGIONALE']||''}</td></tr>`;
   });
-  
   html += `</tbody></table></div>`;
   document.getElementById('detailsContent').innerHTML = html;
   openModal('detailsModal');
@@ -909,31 +1070,26 @@ function showSyntheseDetails(code6) {
 function renderResume() {
   const content = document.getElementById('contentArea');
   const userDirs = DB.currentUser?.directions || DIRECTIONS;
-  
   content.innerHTML = `
     <div class="resume-container">
       <h2 style="color:var(--primary); margin-bottom:10px; font-size:16px;">📋 Résumé des biens cochés (existants)</h2>
-      <p style="color:#6b7280; margin-bottom:15px; font-size:12px;">Affiche uniquement les biens cochés comme existants, regroupés par désignation et triés par ordre alphabétique. Passez la souris sur une désignation pour voir le détail par direction. Cliquez sur une désignation pour voir les détails complets.</p>
-      
+      <p style="color:#6b7280; margin-bottom:15px; font-size:12px;">Biens cochés regroupés par désignation, triés alphabétiquement. Survolez pour le détail par direction. Cliquez pour les détails complets.</p>
       <div style="margin-bottom:15px;">
-        <label style="font-weight:bold; color:var(--primary); display:block; margin-bottom:6px; font-size:13px;">📂 Sélectionner une direction :</label>
+        <label style="font-weight:bold; color:var(--primary); display:block; margin-bottom:6px; font-size:13px;">📂 Direction :</label>
         <select id="resumeDirectionSelect" onchange="updateResumeTable()" class="resume-select">
           <option value="Tout" selected>Tout</option>
           ${userDirs.map(d => `<option value="${d}">${d}</option>`).join('')}
         </select>
         <div id="resumeCountDisplay" style="margin-top:8px; font-size:12px; color:var(--primary); font-weight:bold;"></div>
       </div>
-      
       <div class="resume-table-wrapper">
         <table class="resume-table">
           <thead><tr><th class="col-designation">Désignation</th><th class="col-quantite">Qté</th></tr></thead>
           <tbody id="resumeTableBody"></tbody>
         </table>
       </div>
-      
       <div id="resumeSummary" style="margin-top:10px; padding:8px; background:#eff6ff; border-radius:4px; font-size:12px; font-weight:bold; color:var(--primary);"></div>
-    </div>
-  `;
+    </div>`;
   updateResumeTable();
 }
 
@@ -941,7 +1097,6 @@ function updateResumeTable() {
   const selectEl = document.getElementById('resumeDirectionSelect');
   if (!selectEl) return;
   const selectedDir = selectEl.value;
-  
   let biens = DB.biens.filter(b => b.checked === true && !b.reforme);
   if (selectedDir !== 'Tout') biens = biens.filter(b => b.direction === selectedDir);
 
@@ -956,10 +1111,7 @@ function updateResumeTable() {
     synth[des].parDirection[dir] += qte;
   });
 
-  const rows = Object.entries(synth)
-    .map(([des, data]) => ({ des, total: data.total, parDirection: data.parDirection }))
-    .sort((a, b) => a.des.localeCompare(b.des, 'fr', { sensitivity: 'base' }));
-
+  const rows = Object.entries(synth).map(([des, data]) => ({ des, total: data.total, parDirection: data.parDirection })).sort((a, b) => a.des.localeCompare(b.des, 'fr', { sensitivity: 'base' }));
   const tbody = document.getElementById('resumeTableBody');
   const summaryDiv = document.getElementById('resumeSummary');
   const countDisplay = document.getElementById('resumeCountDisplay');
@@ -973,10 +1125,8 @@ function updateResumeTable() {
 
   tbody.innerHTML = rows.map(r => {
     let tooltipContent = `Total: ${r.total}\n\n`;
-    const sortedDirs = Object.entries(r.parDirection).sort((a, b) => a[0].localeCompare(b[0], 'fr', { sensitivity: 'base' }));
-    sortedDirs.forEach(([dir, qty]) => { tooltipContent += `${dir}: ${qty}\n`; });
+    Object.entries(r.parDirection).sort((a, b) => a[0].localeCompare(b[0], 'fr', { sensitivity: 'base' })).forEach(([dir, qty]) => { tooltipContent += `${dir}: ${qty}\n`; });
     const escapedTooltip = tooltipContent.trim().replace(/"/g, '&quot;');
-    
     return `<tr onclick="showDesignationDetails('${r.des.replace(/'/g, "\\'")}', 'coches')" style="cursor:pointer;">
       <td class="col-designation" data-tooltip="${escapedTooltip}" title="${escapedTooltip}">${r.des}</td>
       <td class="col-quantite">${r.total}</td>
@@ -985,40 +1135,33 @@ function updateResumeTable() {
 
   const totalQte = rows.reduce((sum, r) => sum + r.total, 0);
   const dirLabel = selectedDir === 'Tout' ? 'toutes les directions' : selectedDir;
-  
   if (summaryDiv) summaryDiv.textContent = `📊 Total : ${rows.length} désignation(s) | ${totalQte} bien(s) coché(s) - ${dirLabel}`;
   if (countDisplay) countDisplay.innerHTML = `<span class="resume-count-badge">${rows.length} désignation(s) trouvée(s)</span>`;
 }
 
-// ===== RÉSUMÉ NON COCHÉS =====
 function renderResumeNonCoches() {
   const content = document.getElementById('contentArea');
   const userDirs = DB.currentUser?.directions || DIRECTIONS;
-  
   content.innerHTML = `
     <div class="resume-container">
       <h2 style="color:var(--primary); margin-bottom:10px; font-size:16px;">📋 Résumé des biens non cochés</h2>
-      <p style="color:#6b7280; margin-bottom:15px; font-size:12px;">Affiche uniquement les biens NON cochés (non vérifiés), regroupés par désignation et triés par ordre alphabétique. Passez la souris sur une désignation pour voir le détail par direction. Cliquez sur une désignation pour voir les détails complets.</p>
-      
+      <p style="color:#6b7280; margin-bottom:15px; font-size:12px;">Biens NON cochés regroupés par désignation, triés alphabétiquement. Survolez pour le détail par direction. Cliquez pour les détails complets.</p>
       <div style="margin-bottom:15px;">
-        <label style="font-weight:bold; color:var(--primary); display:block; margin-bottom:6px; font-size:13px;">📂 Sélectionner une direction :</label>
+        <label style="font-weight:bold; color:var(--primary); display:block; margin-bottom:6px; font-size:13px;">📂 Direction :</label>
         <select id="resumeNonCochesDirectionSelect" onchange="updateResumeNonCochesTable()" class="resume-select">
           <option value="Tout" selected>Tout</option>
           ${userDirs.map(d => `<option value="${d}">${d}</option>`).join('')}
         </select>
         <div id="resumeNonCochesCountDisplay" style="margin-top:8px; font-size:12px; color:var(--primary); font-weight:bold;"></div>
       </div>
-      
       <div class="resume-table-wrapper">
         <table class="resume-table">
           <thead><tr><th class="col-designation">Désignation</th><th class="col-quantite">Qté</th></tr></thead>
           <tbody id="resumeNonCochesTableBody"></tbody>
         </table>
       </div>
-      
       <div id="resumeNonCochesSummary" style="margin-top:10px; padding:8px; background:#eff6ff; border-radius:4px; font-size:12px; font-weight:bold; color:var(--primary);"></div>
-    </div>
-  `;
+    </div>`;
   updateResumeNonCochesTable();
 }
 
@@ -1026,7 +1169,6 @@ function updateResumeNonCochesTable() {
   const selectEl = document.getElementById('resumeNonCochesDirectionSelect');
   if (!selectEl) return;
   const selectedDir = selectEl.value;
-  
   let biens = DB.biens.filter(b => b.checked !== true && !b.reforme);
   if (selectedDir !== 'Tout') biens = biens.filter(b => b.direction === selectedDir);
 
@@ -1041,10 +1183,7 @@ function updateResumeNonCochesTable() {
     synth[des].parDirection[dir] += qte;
   });
 
-  const rows = Object.entries(synth)
-    .map(([des, data]) => ({ des, total: data.total, parDirection: data.parDirection }))
-    .sort((a, b) => a.des.localeCompare(b.des, 'fr', { sensitivity: 'base' }));
-
+  const rows = Object.entries(synth).map(([des, data]) => ({ des, total: data.total, parDirection: data.parDirection })).sort((a, b) => a.des.localeCompare(b.des, 'fr', { sensitivity: 'base' }));
   const tbody = document.getElementById('resumeNonCochesTableBody');
   const summaryDiv = document.getElementById('resumeNonCochesSummary');
   const countDisplay = document.getElementById('resumeNonCochesCountDisplay');
@@ -1058,10 +1197,8 @@ function updateResumeNonCochesTable() {
 
   tbody.innerHTML = rows.map(r => {
     let tooltipContent = `Total: ${r.total}\n\n`;
-    const sortedDirs = Object.entries(r.parDirection).sort((a, b) => a[0].localeCompare(b[0], 'fr', { sensitivity: 'base' }));
-    sortedDirs.forEach(([dir, qty]) => { tooltipContent += `${dir}: ${qty}\n`; });
+    Object.entries(r.parDirection).sort((a, b) => a[0].localeCompare(b[0], 'fr', { sensitivity: 'base' })).forEach(([dir, qty]) => { tooltipContent += `${dir}: ${qty}\n`; });
     const escapedTooltip = tooltipContent.trim().replace(/"/g, '&quot;');
-    
     return `<tr onclick="showDesignationDetails('${r.des.replace(/'/g, "\\'")}', 'nonCoches')" style="cursor:pointer;">
       <td class="col-designation" data-tooltip="${escapedTooltip}" title="${escapedTooltip}">${r.des}</td>
       <td class="col-quantite">${r.total}</td>
@@ -1070,7 +1207,6 @@ function updateResumeNonCochesTable() {
 
   const totalQte = rows.reduce((sum, r) => sum + r.total, 0);
   const dirLabel = selectedDir === 'Tout' ? 'toutes les directions' : selectedDir;
-  
   if (summaryDiv) summaryDiv.textContent = `📊 Total : ${rows.length} désignation(s) | ${totalQte} bien(s) non coché(s) - ${dirLabel}`;
   if (countDisplay) countDisplay.innerHTML = `<span class="resume-count-badge">${rows.length} désignation(s) trouvée(s)</span>`;
 }
@@ -1083,16 +1219,13 @@ function renderDirectionTab(direction) {
   const escDir = direction.replace(/'/g, "\\'");
   const admin = isAdmin();
   const importBtn = admin ? `<button class="btn btn-success" onclick="openImport('${escDir}')">📥 Importer Excel</button>` : '';
-  const deleteAllBtn = admin ? `<button class="btn btn-delete" onclick="deleteAllBiens('${escDir}')">🗑️ Tout supprimer</button>` : '';
-  const doublonsBtn = admin ? `<button class="btn btn-doublons" onclick="supprimerDoublonsDirection('${escDir}')">🗑️ Supprimer les doublons</button>` : '';
+  const deleteAllBtn = admin ? `<button class="btn btn-delete" onclick="demanderSuppressionTousBiens('${escDir}')">🗑️ Tout supprimer</button>` : '';
+  const doublonsBtn = admin ? `<button class="btn btn-doublons" onclick="demanderSuppressionDoublonsDirection('${escDir}')">🗑️ Supprimer les doublons</button>` : '';
   
   content.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
       <h2 style="color:var(--primary);">🏢 ${direction}</h2>
-      <div>
-        <button class="btn btn-primary" onclick="openAddBien('${escDir}')">➕ Nouveau bien</button>
-        ${importBtn} ${deleteAllBtn} ${doublonsBtn}
-      </div>
+      <div><button class="btn btn-primary" onclick="openAddBien('${escDir}')">➕ Nouveau bien</button>${importBtn} ${deleteAllBtn} ${doublonsBtn}</div>
     </div>
     <div class="sub-tabs">
       <button class="sub-tab-btn active" onclick="showSubTab('${tabId}', 'biens', this)">📋 Liste des biens</button>
@@ -1129,7 +1262,7 @@ function renderBiensList(direction, containerId, filterChecked, checkedValue, ex
   container.innerHTML = `
     <div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <h3 style="color:var(--primary); font-size:14px;">${exportSuffix.replace(/_/g, ' ')}</h3>
-      <button class="btn btn-export" onclick="exportBiensList('${direction}', ${filterChecked}, ${checkedValue}, '${exportSuffix}')">📊 Exporter cette liste en Excel</button>
+      <button class="btn btn-export" onclick="exportBiensList('${direction}', ${filterChecked}, ${checkedValue}, '${exportSuffix}')">📊 Exporter Excel</button>
     </div>
     <div class="search-bar">
       <input type="text" id="${searchId}_code" placeholder="Code (6 car.)" maxlength="6" oninput="filterTable('${containerId}')" style="width:90px;">
@@ -1157,8 +1290,7 @@ function renderPaginatedTable(containerId, biens) {
   if (!state) return;
   const start = (state.page - 1) * state.pageSize;
   const end = start + state.pageSize;
-  const pageBiens = biens.slice(start, end);
-  fillTableBody(containerId, pageBiens);
+  fillTableBody(containerId, biens.slice(start, end));
   renderPaginationControls(containerId, biens.length);
 }
 
@@ -1175,10 +1307,10 @@ function renderPaginationControls(containerId, total) {
     <button onclick="changePage('${containerId}', ${state.page + 1})" ${state.page === totalPages ? 'disabled' : ''}>Suivant ▶</button>
     <button onclick="changePage('${containerId}', ${totalPages})" ${state.page === totalPages ? 'disabled' : ''}>Dernière ⏭</button>
     <select onchange="changePageSize('${containerId}', this.value)">
-      <option value="50" ${state.pageSize === 50 ? 'selected' : ''}>50 par page</option>
-      <option value="100" ${state.pageSize === 100 ? 'selected' : ''}>100 par page</option>
-      <option value="500" ${state.pageSize === 500 ? 'selected' : ''}>500 par page</option>
-      <option value="1000" ${state.pageSize === 1000 ? 'selected' : ''}>1000 par page</option>
+      <option value="50" ${state.pageSize === 50 ? 'selected' : ''}>50/page</option>
+      <option value="100" ${state.pageSize === 100 ? 'selected' : ''}>100/page</option>
+      <option value="500" ${state.pageSize === 500 ? 'selected' : ''}>500/page</option>
+      <option value="1000" ${state.pageSize === 1000 ? 'selected' : ''}>1000/page</option>
     </select>`;
 }
 
@@ -1186,9 +1318,8 @@ function changePage(containerId, page) {
   const state = paginationState[containerId];
   if (!state) return;
   const container = document.getElementById(containerId);
-  const biens = JSON.parse(container.dataset.biens);
   state.page = page;
-  renderPaginatedTable(containerId, biens);
+  renderPaginatedTable(containerId, JSON.parse(container.dataset.biens));
 }
 
 function changePageSize(containerId, size) {
@@ -1197,21 +1328,16 @@ function changePageSize(containerId, size) {
   state.pageSize = parseInt(size);
   state.page = 1;
   const container = document.getElementById(containerId);
-  const biens = JSON.parse(container.dataset.biens);
-  renderPaginatedTable(containerId, biens);
+  renderPaginatedTable(containerId, JSON.parse(container.dataset.biens));
 }
 
 function exportBiensList(direction, filterChecked, checkedValue, suffix) {
-  showLoading('Préparation de l\'export Excel...');
+  showLoading('Préparation export...');
   setTimeout(() => {
     let biens = DB.biens.filter(b => b.direction === direction && !b.reforme);
     if (filterChecked !== null) biens = biens.filter(b => b.checked === checkedValue);
     if (biens.length > 10000) exportLargeDataset(biens, `Liste_${suffix}_${direction.replace(/\s/g, '_')}`);
-    else {
-      const rows = [COLONNES];
-      biens.forEach(b => rows.push(COLONNES.map(c => b[c] || '')));
-      downloadExcel(rows, `Liste_${suffix}_${direction.replace(/\s/g, '_')}`);
-    }
+    else { const rows = [COLONNES]; biens.forEach(b => rows.push(COLONNES.map(c => b[c] || ''))); downloadExcel(rows, `Liste_${suffix}_${direction.replace(/\s/g, '_')}`); }
     hideLoading();
   }, 100);
 }
@@ -1224,23 +1350,18 @@ function exportLargeDataset(biens, filename) {
     const batch = biens.slice(i, i + batchSize);
     const rows = [COLONNES];
     batch.forEach(b => rows.push(COLONNES.map(c => b[c] || '')));
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    XLSX.utils.book_append_sheet(wb, ws, `Feuille ${sheetNum}`);
-    sheetNum++;
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), `Feuille ${sheetNum++}`);
   }
   XLSX.writeFile(wb, filename + '.xlsx');
 }
 
 function fillTableHead(containerId) {
-  const tableId = containerId + '_table';
-  const head = document.getElementById(tableId + '_head');
-  const cols = window.visibleCols[containerId];
-  head.innerHTML = cols.map(c => `<th>${c}</th>`).join('');
+  const head = document.getElementById(containerId + '_table_head');
+  head.innerHTML = window.visibleCols[containerId].map(c => `<th>${c}</th>`).join('');
 }
 
 function fillTableBody(containerId, biens) {
-  const tableId = containerId + '_table';
-  const body = document.getElementById(tableId + '_body');
+  const body = document.getElementById(containerId + '_table_body');
   const cols = window.visibleCols[containerId];
   const isExistants = containerId.includes('_existants');
   const admin = isAdmin();
@@ -1270,7 +1391,6 @@ async function toggleCheckByDoubleClick(bienId, containerId) {
   await saveDB(); refreshCurrentView(true);
 }
 
-// ===== RECHERCHE IMBRIQUÉE (CUMULATIVE) =====
 function filterTable(containerId) {
   const container = document.getElementById(containerId);
   const searchId = containerId + '_search';
@@ -1278,38 +1398,16 @@ function filterTable(containerId) {
   const annee = document.getElementById(searchId + '_annee').value.trim();
   const numero = document.getElementById(searchId + '_numero').value.trim();
   const general = document.getElementById(searchId + '_general').value.trim().toLowerCase();
-  
-  const allBiens = JSON.parse(container.dataset.biens);
-  let biens = allBiens;
-  
-  // 1. Filtre par Code matière (6 premiers caractères)
-  if (code) {
-    biens = biens.filter(b => (b['CODE MATIERE'] || '').toUpperCase().startsWith(code));
-  }
-  
-  // 2. Filtre par Année (cumulatif)
-  if (annee) {
-    biens = biens.filter(b => (b['ANNEE D\'ACQUISITION'] || '').includes(annee));
-  }
-  
-  // 3. Filtre par Numéro (4 derniers caractères, cumulatif)
-  if (numero) {
-    biens = biens.filter(b => {
-      const num = (b['CODE MATIERE'] || '').slice(-4);
-      return num.includes(numero);
-    });
-  }
-  
-  // 4. Filtre général : Désignation, Bureau/Service, Utilisateur
-  if (general) {
-    biens = biens.filter(b => {
-      const designation = (b['DESIGNATION'] || '').toLowerCase();
-      const bureau = (b['BUREAU/SERVICE'] || '').toLowerCase();
-      const utilisateur = (b['UTILISATEUR'] || '').toLowerCase();
-      return designation.includes(general) || bureau.includes(general) || utilisateur.includes(general);
-    });
-  }
-  
+  let biens = JSON.parse(container.dataset.biens);
+  if (code) biens = biens.filter(b => (b['CODE MATIERE'] || '').toUpperCase().startsWith(code));
+  if (annee) biens = biens.filter(b => (b['ANNEE D\'ACQUISITION'] || '').includes(annee));
+  if (numero) biens = biens.filter(b => (b['CODE MATIERE'] || '').slice(-4).includes(numero));
+  if (general) biens = biens.filter(b => {
+    const d = (b['DESIGNATION'] || '').toLowerCase();
+    const bu = (b['BUREAU/SERVICE'] || '').toLowerCase();
+    const u = (b['UTILISATEUR'] || '').toLowerCase();
+    return d.includes(general) || bu.includes(general) || u.includes(general);
+  });
   document.getElementById(searchId + '_count').textContent = biens.length + ' bien(s)';
   paginationState[containerId] = { page: 1, pageSize: paginationState[containerId]?.pageSize || 100, total: biens.length };
   renderPaginatedTable(containerId, biens);
@@ -1349,8 +1447,7 @@ function updateCols(containerId, col, checked) {
   window.visibleCols[containerId] = cols;
   fillTableHead(containerId);
   const container = document.getElementById(containerId);
-  const biens = JSON.parse(container.dataset.biens);
-  renderPaginatedTable(containerId, biens);
+  renderPaginatedTable(containerId, JSON.parse(container.dataset.biens));
 }
 
 function renderSynthese(direction, containerId, onlyChecked) {
@@ -1370,7 +1467,7 @@ function renderSynthese(direction, containerId, onlyChecked) {
   container.innerHTML = `
     <div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <h3 style="color:var(--primary); font-size:14px;">Synthèse ${onlyChecked ? 'des biens cochés' : 'des biens non cochés'}</h3>
-      <button class="btn btn-export" onclick="exportSynthese('${direction}', ${onlyChecked})">📊 Exporter cette synthèse en Excel</button>
+      <button class="btn btn-export" onclick="exportSynthese('${direction}', ${onlyChecked})">📊 Exporter Excel</button>
     </div>
     <div class="table-wrapper">
       <table class="patrimoine-table">
@@ -1387,38 +1484,31 @@ function renderConfrontation(direction, containerId) {
   const biensImportesCoches = biensImportes.filter(b => b.checked);
   const biensImportesNonCoches = biensImportes.filter(b => !b.checked);
   const biensSaisis = tousBiens.filter(b => b.source === 'saisie' || !b.source);
-  
   function genererListeBiens(biens) {
     if (biens.length === 0) return '<p style="color:#6b7280; padding:10px; text-align:center;">Aucun bien</p>';
-    return `<div class="item-list" style="max-height:300px; overflow:auto;">${biens.map(b => `<div class="item-row" style="padding:6px 10px; border-bottom:1px solid #e5e7eb; font-size:11px;"><span style="font-family:monospace; font-weight:bold; color:var(--primary);">${b['CODE MATIERE'] || 'N/A'}</span><span style="flex:1; margin:0 10px;">${b['DESIGNATION'] || ''}</span><span style="font-weight:bold;">${b['ETAT'] || 'N/A'}</span><span>${b['ANNEE D\'ACQUISITION'] || ''}</span></div>`).join('')}</div>`;
+    return `<div style="max-height:300px; overflow:auto;">${biens.map(b => `<div style="padding:6px 10px; border-bottom:1px solid #e5e7eb; font-size:11px;"><span style="font-family:monospace; font-weight:bold; color:var(--primary);">${b['CODE MATIERE'] || 'N/A'}</span> - ${b['DESIGNATION'] || ''} - ${b['ETAT'] || 'N/A'}</div>`).join('')}</div>`;
   }
-  
   container.innerHTML = `
     <div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <h3 style="color:var(--primary); font-size:14px;">⚖️ Confrontation - ${direction}</h3>
-      <button class="btn btn-export" onclick="exportConfrontation('${direction}')">📊 Exporter la confrontation en Excel</button>
+      <button class="btn btn-export" onclick="exportConfrontation('${direction}')">📊 Exporter Excel</button>
     </div>
     <div class="dashboard-grid">
-      <div class="stat-card" style="background:#fee2e2;"><h4>❌ Biens manquants (non cochés)</h4><div class="value">${biensImportesNonCoches.length}</div></div>
-      <div class="stat-card" style="background:#d1fae5;"><h4>✅ Biens existants (cochés)</h4><div class="value">${biensImportesCoches.length}</div></div>
+      <div class="stat-card" style="background:#fee2e2;"><h4>❌ Biens manquants</h4><div class="value">${biensImportesNonCoches.length}</div></div>
+      <div class="stat-card" style="background:#d1fae5;"><h4>✅ Biens existants</h4><div class="value">${biensImportesCoches.length}</div></div>
       <div class="stat-card" style="background:#cffafe;"><h4>🆕 Nouvelles saisies</h4><div class="value">${biensSaisis.length}</div></div>
       <div class="stat-card" style="background:#dbeafe;"><h4>📦 Total importés</h4><div class="value">${biensImportes.length}</div></div>
     </div>
-    <div class="confrontation-section section-manquants"><h4>❌ Biens manquants (non cochés)</h4>${genererListeBiens(biensImportesNonCoches)}</div>
-    <div class="confrontation-section section-existants"><h4>✅ Biens existants (cochés)</h4>${genererListeBiens(biensImportesCoches)}</div>
+    <div class="confrontation-section section-manquants"><h4>❌ Biens manquants</h4>${genererListeBiens(biensImportesNonCoches)}</div>
+    <div class="confrontation-section section-existants"><h4>✅ Biens existants</h4>${genererListeBiens(biensImportesCoches)}</div>
     <div class="confrontation-section section-saisies"><h4>🆕 Nouvelles saisies</h4>${genererListeBiens(biensSaisis)}</div>`;
 }
 
 function exportConfrontation(direction) {
   const tousBiens = DB.biens.filter(b => b.direction === direction && !b.reforme);
   const biensImportes = tousBiens.filter(b => b.source === 'import');
-  const biensImportesCoches = biensImportes.filter(b => b.checked);
-  const biensImportesNonCoches = biensImportes.filter(b => !b.checked);
-  const biensSaisis = tousBiens.filter(b => b.source === 'saisie' || !b.source);
-  const rows = [['CONFRONTATION - ' + direction], ['Manquants:', biensImportesNonCoches.length, 'Existants:', biensImportesCoches.length, 'Saisis:', biensSaisis.length], [], ['CODE', 'DESIGNATION', 'ETAT', 'ANNÉE', 'SOURCE']];
-  [...biensImportesNonCoches, ...biensImportesCoches, ...biensSaisis].forEach(b => {
-    rows.push([b['CODE MATIERE']||'', b['DESIGNATION']||'', b['ETAT']||'', b['ANNEE D\'ACQUISITION']||'', b.source || 'saisie']);
-  });
+  const rows = [['CONFRONTATION - ' + direction], ['Manquants:', biensImportes.filter(b=>!b.checked).length, 'Existants:', biensImportes.filter(b=>b.checked).length], [], ['CODE', 'DESIGNATION', 'ETAT', 'ANNÉE', 'SOURCE']];
+  tousBiens.forEach(b => rows.push([b['CODE MATIERE']||'', b['DESIGNATION']||'', b['ETAT']||'', b['ANNEE D\'ACQUISITION']||'', b.source || 'saisie']));
   downloadExcel(rows, 'Confrontation_' + direction.replace(/\s/g, '_'));
 }
 
@@ -1428,7 +1518,7 @@ function renderReformes(direction, containerId) {
   container.innerHTML = `
     <div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <h3 style="color:var(--primary); font-size:14px;">🔄 Biens proposés à la réforme</h3>
-      <button class="btn btn-export" onclick="exportReformes('${direction}')">📊 Exporter les réformes en Excel</button>
+      <button class="btn btn-export" onclick="exportReformes('${direction}')">📊 Exporter Excel</button>
     </div>
     <div class="table-wrapper">
       <table class="patrimoine-table">
@@ -1442,10 +1532,7 @@ async function proposeReforme(id, btnElement) {
   if (!confirm('Proposer ce bien à la réforme ?')) return;
   const bien = DB.biens.find(x => x.id === id);
   if (!bien) return;
-  if (btnElement) {
-    const row = btnElement.closest('tr');
-    if (row) { row.classList.add('row-deleting'); await new Promise(resolve => setTimeout(resolve, 600)); }
-  }
+  if (btnElement) { const row = btnElement.closest('tr'); if (row) { row.classList.add('row-deleting'); await new Promise(r => setTimeout(r, 600)); } }
   bien.reforme = true;
   await saveDB(); refreshCurrentView(true);
 }
@@ -1472,14 +1559,14 @@ function renderGeneralList() {
   const cListe = document.getElementById('general_liste');
   cListe.innerHTML = `
     <div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-      <h3 style="color:var(--primary); font-size:14px;">Liste complète de tous les biens</h3>
-      <button class="btn btn-export" onclick="exportGeneralList()">📊 Exporter la liste générale en Excel</button>
+      <h3 style="color:var(--primary); font-size:14px;">Liste complète</h3>
+      <button class="btn btn-export" onclick="exportGeneralList()">📊 Exporter Excel</button>
     </div>
     <div class="search-bar">
       <input type="text" id="general_search_code" placeholder="Code" maxlength="6" oninput="filterTable('general_liste')" style="width:80px;">
       <input type="text" id="general_search_annee" placeholder="Année" maxlength="4" oninput="filterTable('general_liste')" style="width:70px;">
       <input type="text" id="general_search_numero" placeholder="Numéro" maxlength="4" oninput="filterTable('general_liste')" style="width:70px;">
-      <input type="text" id="general_search_general" placeholder="🔍 Recherche (Désignation/Bureau/Utilisateur)..." oninput="filterTable('general_liste')" style="flex:1;">
+      <input type="text" id="general_search_general" placeholder="🔍 Recherche..." oninput="filterTable('general_liste')" style="flex:1;">
       <div class="search-count" id="general_search_count">${biens.length} bien(s)</div>
       <button class="btn" style="background:#6b7280; color:white;" onclick="chooseColumns('general_liste')">👁️ Colonnes</button>
     </div>
@@ -1494,31 +1581,25 @@ function renderGeneralList() {
 }
 
 function exportGeneralList() {
-  showLoading('Préparation de l\'export Excel...');
+  showLoading('Préparation export...');
   setTimeout(() => {
     const biens = DB.biens.filter(b => !b.reforme);
     const exportCols = [...COLONNES, 'DIRECTION'];
-    if (biens.length > 10000) {
-      exportLargeDataset(biens.map(b => { const obj = {}; exportCols.forEach(c => obj[c] = b[c] || ''); return obj; }), 'Liste_Generale_Complete');
-    } else {
-      const rows = [exportCols];
-      biens.forEach(b => rows.push(exportCols.map(c => b[c] || '')));
-      downloadExcel(rows, 'Liste_Generale_Complete');
-    }
+    const rows = [exportCols];
+    biens.forEach(b => rows.push(exportCols.map(c => b[c] || '')));
+    downloadExcel(rows, 'Liste_Generale_Complete');
     hideLoading();
   }, 100);
 }
 
-// ===== SYNTHÈSE GÉNÉRALE AVEC INFOBULES ET CLIC =====
 function renderGeneralSynthese() {
   const c = document.getElementById('general_synthese');
   const biens = DB.biens.filter(b => !b.reforme);
   const synth = {};
-  
   biens.forEach(b => {
     const code6 = (b['CODE MATIERE']||'').substring(0,6);
     if (!code6) return;
-    if (!synth[code6]) synth[code6] = { code: code6, designation: b['DESIGNATION']||'', Bon:0, Passable:0, 'En panne':0, Mauvais:0, Perdu:0, total:0, parDirection: {} };
+    if (!synth[code6]) synth[code6] = { code: code6, designation: b['DESIGNATION']||'', Bon:0, Passable:0, 'En panne':0, Mauvais:0, total:0, parDirection: {} };
     const e = b['ETAT']||'';
     if (synth[code6][e] !== undefined) synth[code6][e]++;
     synth[code6].total++;
@@ -1526,24 +1607,20 @@ function renderGeneralSynthese() {
     if (!synth[code6].parDirection[dir]) synth[code6].parDirection[dir] = 0;
     synth[code6].parDirection[dir]++;
   });
-  
   const rows = Object.values(synth);
-  
   c.innerHTML = `
     <div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <h3 style="color:var(--primary); font-size:14px;">Synthèse générale par code matière</h3>
-      <button class="btn btn-export" onclick="exportGeneralSynthese()">📊 Exporter la synthèse générale en Excel</button>
+      <button class="btn btn-export" onclick="exportGeneralSynthese()">📊 Exporter Excel</button>
     </div>
     <div class="table-wrapper" style="margin-top:10px;">
       <table class="patrimoine-table">
         <thead><tr><th>Code</th><th>Désignation</th><th style="background:#10b981;">Bon</th><th style="background:#f59e0b;">Passable</th><th style="background:#ef4444;">En panne</th><th style="background:#7c2d12;">Mauvais</th><th style="background:#1e3a8a; color:white;">Total</th></tr></thead>
         <tbody>${rows.map(r => {
           let tooltipContent = `Code: ${r.code}\nTotal: ${r.total}\n\n`;
-          const sortedDirs = Object.entries(r.parDirection).sort((a, b) => a[0].localeCompare(b[0], 'fr', { sensitivity: 'base' }));
-          sortedDirs.forEach(([dir, qty]) => { tooltipContent += `${dir}: ${qty}\n`; });
+          Object.entries(r.parDirection).sort((a, b) => a[0].localeCompare(b[0], 'fr', { sensitivity: 'base' })).forEach(([dir, qty]) => { tooltipContent += `${dir}: ${qty}\n`; });
           const escapedTooltip = tooltipContent.trim().replace(/"/g, '&quot;');
           const escapedCode = r.code.replace(/'/g, "\\'");
-          
           return `<tr>
             <td class="synthese-cell" data-tooltip="${escapedTooltip}" title="${escapedTooltip}" onclick="showSyntheseDetails('${escapedCode}')">${r.code}</td>
             <td class="synthese-cell" data-tooltip="${escapedTooltip}" title="${escapedTooltip}" onclick="showSyntheseDetails('${escapedCode}')">${r.designation}</td>
@@ -1565,9 +1642,8 @@ function renderGeneralConfrontation() {
   const biensImportesCoches = biensImportes.filter(b => b.checked);
   const biensImportesNonCoches = biensImportes.filter(b => !b.checked);
   const biensSaisis = tousBiens.filter(b => b.source === 'saisie' || !b.source);
-  
   let html = '<div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><h3 style="color:var(--primary); font-size:14px;">⚖️ Confrontation générale</h3>';
-  html += '<button class="btn btn-export" onclick="exportConfrontationAll()">📊 Exporter la confrontation complète en Excel</button></div>';
+  html += '<button class="btn btn-export" onclick="exportConfrontationAll()">📊 Exporter Excel</button></div>';
   html += `<div class="dashboard-grid">
     <div class="stat-card" style="background:#fee2e2;"><h4>📉 Biens manquants</h4><div class="value">${biensImportesNonCoches.length}</div></div>
     <div class="stat-card" style="background:#d1fae5;"><h4>✅ Biens existants</h4><div class="value">${biensImportesCoches.length}</div></div>
@@ -1580,6 +1656,424 @@ function renderGeneralConfrontation() {
 function exportConfrontationAll() {
   const rows = [['CONFRONTATION GENERALE'], ['Date', new Date().toLocaleDateString('fr-FR')], [], ['RÉSUMÉ'], ['Manquants:', DB.biens.filter(b=>b.source==='import'&&!b.checked).length, 'Existants:', DB.biens.filter(b=>b.source==='import'&&b.checked).length, 'Saisis:', DB.biens.filter(b=>b.source==='saisie'||!b.source).length]];
   downloadExcel(rows, 'Confrontation_Generale');
+}
+
+// ===== MESSAGES =====
+function renderMessages() {
+  const content = document.getElementById('contentArea');
+  content.innerHTML = `
+    <div class="messages-container">
+      <div class="messages-sidebar">
+        <div class="messages-sidebar-header">
+          <span>💬 Messages</span>
+          <button class="btn btn-primary" onclick="openComposeMessage()">✉️ Nouveau</button>
+        </div>
+        <div style="padding:8px; border-bottom:1px solid #e5e7eb;">
+          <button class="btn btn-whatsapp" style="width:100%;" onclick="openWhatsAppModal()">📱 Contacts WhatsApp</button>
+        </div>
+        <div class="messages-list" id="messagesList"></div>
+      </div>
+      <div class="messages-main">
+        <div class="messages-main-header">
+          <span id="messagesMainTitle">Sélectionnez un message</span>
+          <div>
+            <button class="btn btn-info" onclick="refreshMessagesList()">🔄 Actualiser</button>
+          </div>
+        </div>
+        <div class="messages-main-body" id="messagesMainBody">
+          <div class="empty-messages">
+            <div class="icon">💬</div>
+            <p>Sélectionnez un message pour afficher la conversation</p>
+          </div>
+        </div>
+        <div class="messages-main-footer" id="messagesMainFooter" style="display:none;">
+          <div class="compose-form">
+            <textarea id="quickReplyContent" placeholder="Votre réponse rapide..."></textarea>
+            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="sendQuickReply('public')">📢 Réponse publique</button>
+              <button class="btn btn-info" onclick="sendQuickReply('private')">🔒 Réponse privée</button>
+              <button class="btn btn-success" onclick="openReplyModal()">↩️ Réponse détaillée</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  refreshMessagesList();
+}
+
+function refreshMessagesList() {
+  if (!DB.currentUser) return;
+  const list = document.getElementById('messagesList');
+  if (!list) return;
+  
+  const myMessages = DB.messages.filter(m => 
+    m.to_user === '__all__' || m.to_user === DB.currentUser.username || m.from_user === DB.currentUser.username
+  ).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  
+  if (myMessages.length === 0) {
+    list.innerHTML = '<div class="empty-messages" style="padding:20px;"><div class="icon">📭</div><p>Aucun message</p></div>';
+    return;
+  }
+  
+  list.innerHTML = myMessages.map(m => {
+    const isUnread = !m.read_by || !m.read_by.includes(DB.currentUser.username);
+    const isToAll = m.to_user === '__all__';
+    const fromLabel = m.from_user === DB.currentUser.username ? '➡️ Moi' : `⬅️ ${m.from_user}`;
+    const toLabel = isToAll ? '📢 Tous' : `👤 ${m.to_user}`;
+    const subject = m.subject || '(Sans sujet)';
+    const date = new Date(m.timestamp).toLocaleString('fr-FR');
+    return `<div class="message-item ${isUnread ? 'unread' : ''} ${currentMessageThread === m.id ? 'active' : ''}" onclick="openMessageThread('${m.id}')">
+      <div class="msg-from">${fromLabel} → ${toLabel} ${isUnread ? '<span class="notification-dot"></span>' : ''}</div>
+      <div class="msg-subject">${subject}</div>
+      <div class="msg-date">${date}</div>
+    </div>`;
+  }).join('');
+}
+
+function openMessageThread(messageId) {
+  const message = DB.messages.find(m => m.id === messageId);
+  if (!message) return;
+  currentMessageThread = messageId;
+  
+  if (!message.read_by) message.read_by = [];
+  if (!message.read_by.includes(DB.currentUser.username)) {
+    message.read_by.push(DB.currentUser.username);
+    saveDB();
+    refreshMessagesList();
+  }
+  
+  const body = document.getElementById('messagesMainBody');
+  const footer = document.getElementById('messagesMainFooter');
+  const title = document.getElementById('messagesMainTitle');
+  
+  title.textContent = `📬 ${message.subject || '(Sans sujet)'}`;
+  footer.style.display = 'block';
+  
+  const conversation = getConversation(messageId);
+  
+  body.innerHTML = conversation.map(msg => {
+    const isSent = msg.from_user === DB.currentUser.username;
+    const isPublic = msg.reply_type === 'public';
+    const date = new Date(msg.timestamp).toLocaleString('fr-FR');
+    let fileHtml = '';
+    if (msg.file_name) {
+      fileHtml = `<div class="msg-file">📎 <a href="#" onclick="downloadMessageFile('${msg.id}'); return false;">${msg.file_name}</a></div>`;
+    }
+    let replyIndicator = '';
+    if (msg.parent_id) {
+      replyIndicator = `<div style="font-size:10px; color:#6b7280; margin-bottom:4px;">↩️ ${isPublic ? 'Réponse publique' : 'Réponse privée'}</div>`;
+    }
+    // Bouton de suppression visible uniquement pour l'expéditeur
+    let deleteBtn = '';
+    if (isSent) {
+      deleteBtn = `<button class="delete-msg-btn" onclick="deleteMessage('${msg.id}')" title="Supprimer ce message">🗑️</button>`;
+    }
+    return `<div class="message-thread">
+      <div class="message-bubble ${isSent ? 'sent' : 'received'}">
+        ${deleteBtn}
+        <div class="msg-author">${msg.from_user} ${isPublic && msg.parent_id ? '(public)' : ''}</div>
+        ${replyIndicator}
+        <div class="msg-content">${msg.content || ''}</div>
+        ${fileHtml}
+        <div class="msg-meta">${date}</div>
+        <div class="reply-actions">
+          <button class="btn btn-info" onclick="openReplyModal('${msg.id}')">↩️ Répondre</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  
+  body.scrollTop = body.scrollHeight;
+  refreshMessagesList();
+}
+
+// ===== NOUVELLE FONCTION : SUPPRESSION DE MESSAGE PAR L'EXPÉDITEUR =====
+async function deleteMessage(messageId) {
+  const msg = DB.messages.find(m => m.id === messageId);
+  if (!msg) return;
+  
+  // Vérifier que l'utilisateur est bien l'expéditeur
+  if (msg.from_user !== DB.currentUser.username) {
+    alert('⛔ Vous ne pouvez supprimer que vos propres messages.');
+    return;
+  }
+  
+  if (!confirm(`Voulez-vous vraiment supprimer ce message${msg.subject ? ' "' + msg.subject + '"' : ''} ?\n\nToutes les réponses associées seront également supprimées.`)) return;
+  
+  // Supprimer le message et toutes ses réponses (directes et indirectes)
+  const idsToDelete = new Set([messageId]);
+  
+  // Trouver toutes les réponses (récursivement)
+  let hasMore = true;
+  while (hasMore) {
+    hasMore = false;
+    DB.messages.forEach(m => {
+      if (m.parent_id && idsToDelete.has(m.parent_id) && !idsToDelete.has(m.id)) {
+        idsToDelete.add(m.id);
+        hasMore = true;
+      }
+    });
+  }
+  
+  DB.messages = DB.messages.filter(m => !idsToDelete.has(m.id));
+  
+  DB.actions.push({
+    date: new Date().toISOString(),
+    user: DB.currentUser.username,
+    action: `Suppression de message "${msg.subject || '(Sans sujet)'}" et ${idsToDelete.size - 1} réponse(s) associée(s)`
+  });
+  
+  await saveDB();
+  alert(`✅ Message et ${idsToDelete.size - 1} réponse(s) supprimé(s).`);
+  
+  // Si le message supprimé était le thread courant, revenir à la liste
+  if (idsToDelete.has(currentMessageThread)) {
+    currentMessageThread = null;
+    document.getElementById('messagesMainTitle').textContent = 'Sélectionnez un message';
+    document.getElementById('messagesMainBody').innerHTML = '<div class="empty-messages"><div class="icon">💬</div><p>Sélectionnez un message pour afficher la conversation</p></div>';
+    document.getElementById('messagesMainFooter').style.display = 'none';
+  } else {
+    openMessageThread(currentMessageThread);
+  }
+  buildTabs();
+}
+
+function getConversation(messageId) {
+  const root = DB.messages.find(m => m.id === messageId);
+  if (!root) return [];
+  const all = [root];
+  const replies = DB.messages.filter(m => m.parent_id === messageId || m.parent_id === root.parent_id);
+  replies.forEach(r => { if (!all.find(a => a.id === r.id)) all.push(r); });
+  return all.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+}
+
+function openComposeMessage() {
+  const select = document.getElementById('msgTo');
+  select.innerHTML = '<option value="__all__">📢 Tous les utilisateurs</option>';
+  DB.users.forEach(u => {
+    if (u.username !== DB.currentUser.username) {
+      select.innerHTML += `<option value="${u.username}">👤 ${u.prenom} ${u.nom} (${u.username})</option>`;
+    }
+  });
+  document.getElementById('msgSubject').value = '';
+  document.getElementById('msgContent').value = '';
+  document.getElementById('msgFile').value = '';
+  document.getElementById('msgFileInfo').textContent = '';
+  openModal('composeMessageModal');
+}
+
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'msgFile' || e.target.id === 'replyFile') {
+    const file = e.target.files[0];
+    const infoId = e.target.id === 'msgFile' ? 'msgFileInfo' : 'replyFileInfo';
+    const infoEl = document.getElementById(infoId);
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        infoEl.textContent = '⚠️ Fichier trop volumineux (max 5 Mo)';
+        infoEl.style.color = 'red';
+        e.target.value = '';
+      } else {
+        infoEl.textContent = `✅ ${file.name} (${(file.size/1024).toFixed(1)} Ko)`;
+        infoEl.style.color = 'green';
+      }
+    } else {
+      infoEl.textContent = '';
+    }
+  }
+});
+
+async function sendMessage() {
+  const to = document.getElementById('msgTo').value;
+  const subject = document.getElementById('msgSubject').value.trim();
+  const content = document.getElementById('msgContent').value.trim();
+  const fileInput = document.getElementById('msgFile');
+  
+  if (!content && !fileInput.files[0]) { alert('Veuillez saisir un message ou joindre un fichier.'); return; }
+  
+  let fileName = null, fileData = null;
+  if (fileInput.files[0]) {
+    fileName = fileInput.files[0].name;
+    fileData = await fileToBase64(fileInput.files[0]);
+  }
+  
+  const message = {
+    id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    from_user: DB.currentUser.username,
+    to_user: to,
+    subject: subject,
+    content: content,
+    file_name: fileName,
+    file_data: fileData,
+    parent_id: null,
+    reply_type: null,
+    timestamp: new Date().toISOString(),
+    read_by: []
+  };
+  
+  DB.messages.push(message);
+  await saveDB();
+  closeModal('composeMessageModal');
+  alert('✅ Message envoyé !');
+  if (currentTab === 'messages') renderMessages();
+  buildTabs();
+}
+
+async function sendReply() {
+  const replyType = document.getElementById('replyType').value;
+  const content = document.getElementById('replyContent').value.trim();
+  const fileInput = document.getElementById('replyFile');
+  
+  if (!content && !fileInput.files[0]) { alert('Veuillez saisir une réponse ou joindre un fichier.'); return; }
+  
+  let fileName = null, fileData = null;
+  if (fileInput.files[0]) {
+    fileName = fileInput.files[0].name;
+    fileData = await fileToBase64(fileInput.files[0]);
+  }
+  
+  const reply = {
+    id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    from_user: DB.currentUser.username,
+    to_user: replyType === 'public' ? '__all__' : currentReplyToUser,
+    subject: 'Re: ' + (currentReplySubject || ''),
+    content: content,
+    file_name: fileName,
+    file_data: fileData,
+    parent_id: currentReplyParentId,
+    reply_type: replyType,
+    timestamp: new Date().toISOString(),
+    read_by: []
+  };
+  
+  DB.messages.push(reply);
+  await saveDB();
+  closeModal('replyMessageModal');
+  alert('✅ Réponse envoyée !');
+  if (currentMessageThread) openMessageThread(currentMessageThread);
+  buildTabs();
+}
+
+let currentReplyParentId = null;
+let currentReplyToUser = null;
+let currentReplySubject = null;
+
+function openReplyModal(parentId) {
+  const parent = DB.messages.find(m => m.id === parentId);
+  if (!parent) return;
+  currentReplyParentId = parentId;
+  currentReplyToUser = parent.from_user;
+  currentReplySubject = parent.subject;
+  
+  document.getElementById('replyOriginalMessage').innerHTML = `
+    <b>De:</b> ${parent.from_user}<br>
+    <b>Sujet:</b> ${parent.subject || '(Sans sujet)'}<br>
+    <b>Message:</b> ${parent.content || '(Fichier joint)'}
+  `;
+  document.getElementById('replyContent').value = '';
+  document.getElementById('replyFile').value = '';
+  document.getElementById('replyFileInfo').textContent = '';
+  openModal('replyMessageModal');
+}
+
+function sendQuickReply(type) {
+  const content = document.getElementById('quickReplyContent').value.trim();
+  if (!content) { alert('Veuillez saisir une réponse.'); return; }
+  const parent = DB.messages.find(m => m.id === currentMessageThread);
+  if (!parent) return;
+  
+  const reply = {
+    id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    from_user: DB.currentUser.username,
+    to_user: type === 'public' ? '__all__' : parent.from_user,
+    subject: 'Re: ' + (parent.subject || ''),
+    content: content,
+    file_name: null,
+    file_data: null,
+    parent_id: parent.id,
+    reply_type: type,
+    timestamp: new Date().toISOString(),
+    read_by: []
+  };
+  
+  DB.messages.push(reply);
+  saveDB();
+  document.getElementById('quickReplyContent').value = '';
+  openMessageThread(currentMessageThread);
+  buildTabs();
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function downloadMessageFile(messageId) {
+  const msg = DB.messages.find(m => m.id === messageId);
+  if (!msg || !msg.file_data) { alert('Fichier non disponible.'); return; }
+  const a = document.createElement('a');
+  a.href = msg.file_data;
+  a.download = msg.file_name;
+  a.click();
+}
+
+function openWhatsAppModal() {
+  const content = document.getElementById('whatsappContent');
+  if (DB.whatsappContacts.length === 0) {
+    content.innerHTML = `
+      <p style="margin-bottom:10px;">Aucun contact WhatsApp enregistré.</p>
+      <label>Ajouter un contact :</label>
+      <div style="display:flex; gap:8px; margin-top:5px;">
+        <input type="text" id="waName" placeholder="Nom" style="flex:1;">
+        <input type="text" id="waNumber" placeholder="+226 XX XX XX XX" style="flex:1;">
+        <button class="btn btn-success" onclick="addWhatsAppContact()">➕ Ajouter</button>
+      </div>`;
+    return;
+  }
+  content.innerHTML = `
+    <p style="margin-bottom:10px;">Cliquez sur un numéro pour ouvrir WhatsApp Web :</p>
+    <div class="whatsapp-list">
+      ${DB.whatsappContacts.map((c, i) => `
+        <div class="whatsapp-item">
+          <div>
+            <div class="wa-name">${c.name}</div>
+            <div class="wa-number">${c.number}</div>
+          </div>
+          <div style="display:flex; gap:5px;">
+            <a href="https://wa.me/${c.number.replace(/[^0-9]/g, '')}" target="_blank">💬 Ouvrir</a>
+            <button class="btn btn-delete" onclick="removeWhatsAppContact(${i})">🗑️</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="margin-top:15px; padding-top:15px; border-top:1px solid #e5e7eb;">
+      <label>Ajouter un contact :</label>
+      <div style="display:flex; gap:8px; margin-top:5px;">
+        <input type="text" id="waName" placeholder="Nom" style="flex:1;">
+        <input type="text" id="waNumber" placeholder="+226 XX XX XX XX" style="flex:1;">
+        <button class="btn btn-success" onclick="addWhatsAppContact()">➕ Ajouter</button>
+      </div>
+    </div>`;
+  openModal('whatsappModal');
+}
+
+function addWhatsAppContact() {
+  const name = document.getElementById('waName').value.trim();
+  const number = document.getElementById('waNumber').value.trim();
+  if (!name || !number) { alert('Nom et numéro requis.'); return; }
+  DB.whatsappContacts.push({ name, number });
+  saveDB();
+  openWhatsAppModal();
+}
+
+function removeWhatsAppContact(index) {
+  if (!confirm('Supprimer ce contact ?')) return;
+  DB.whatsappContacts.splice(index, 1);
+  saveDB();
+  openWhatsAppModal();
 }
 
 function renderParams() {
@@ -1615,8 +2109,6 @@ function renderParams() {
 function renderDoublonsParams() {
   const c = document.getElementById('params_doublons');
   if (!c) return;
-  
-  // Compter les doublons globaux
   const allBiens = DB.biens.filter(b => !b.reforme);
   const codeCounts = {};
   allBiens.forEach(b => {
@@ -1625,22 +2117,19 @@ function renderDoublonsParams() {
     codeCounts[code] = (codeCounts[code] || 0) + 1;
   });
   const totalDoublons = Object.values(codeCounts).reduce((sum, count) => sum + Math.max(0, count - 1), 0);
-  
   c.innerHTML = `
     <div style="padding:15px; background:#fef3c7; border:2px solid var(--warning); border-radius:6px; margin-bottom:15px;">
       <h4 style="color:var(--warning); margin-bottom:10px;">🗑️ Gestion des doublons</h4>
-      <p style="font-size:12px; margin-bottom:10px;">Un doublon est un bien ayant le même <b>CODE MATIERE</b> qu'un autre bien dans la même direction. Lors de la suppression, le premier bien enregistré est conservé.</p>
-      <p style="font-size:13px; font-weight:bold; color:var(--danger);">⚠️ Total de doublons détectés : ${totalDoublons}</p>
+      <p style="font-size:12px; margin-bottom:10px;">Un doublon est un bien ayant le même CODE MATIERE. Le premier bien est conservé.</p>
+      <p style="font-size:13px; font-weight:bold; color:var(--danger);">⚠️ Total de doublons : ${totalDoublons}</p>
     </div>
-    <div style="display:flex; flex-direction:column; gap:10px;">
-      <button class="btn btn-doublons" style="width:100%; padding:12px; font-size:13px;" onclick="supprimerTousDoublons()">
-        🗑️ Supprimer TOUS les doublons de la base (${totalDoublons} trouvé(s))
-      </button>
-      <div style="padding:10px; background:#fee2e2; border:1px solid var(--danger); border-radius:4px; font-size:11px; color:#991b1b;">
-        ⚠️ <b>Attention :</b> Cette action est irréversible. Assurez-vous d'avoir une sauvegarde avant de procéder.
-      </div>
+    <div style="padding:15px; background:#fee2e2; border:2px solid var(--danger); border-radius:6px; margin-bottom:15px;">
+      <h4 style="color:var(--danger); margin-bottom:10px;">🔐 Sécurité renforcée</h4>
+      <p style="font-size:12px;">Toute suppression ou importation nécessite les deux mots de passe : <b>Kargougou</b> et <b>ktibw</b></p>
     </div>
-  `;
+    <button class="btn btn-doublons" style="width:100%; padding:12px; font-size:13px;" onclick="demanderSuppressionTousDoublons()">
+      🗑️ Supprimer TOUS les doublons (${totalDoublons} trouvé(s))
+    </button>`;
 }
 
 function renderUsersList() {
@@ -1650,7 +2139,7 @@ function renderUsersList() {
     <div class="table-wrapper" style="margin-top:10px;">
       <table class="patrimoine-table">
         <thead><tr><th>Nom</th><th>Prénom</th><th>Utilisateur</th><th>Type</th><th>Directions</th><th>Actions</th></tr></thead>
-        <tbody>${DB.users.map(u => `<tr><td>${u.nom}</td><td>${u.prenom}</td><td>${u.username}</td><td>${u.type}</td><td>${(u.directions||[]).length} direction(s)</td><td><button class="btn btn-edit" onclick="editUser('${u.username}')">✏️</button>${u.username !== DB.currentUser.username ? `<button class="btn btn-delete" onclick="deleteUser('${u.username}')">🗑️</button>` : ''}</td></tr>`).join('')}</tbody>
+        <tbody>${DB.users.map(u => `<tr><td>${u.nom}</td><td>${u.prenom}</td><td>${u.username}</td><td>${u.type}</td><td>${(u.directions||[]).length}</td><td><button class="btn btn-edit" onclick="editUser('${u.username}')">✏️</button>${u.username !== DB.currentUser.username ? `<button class="btn btn-delete" onclick="deleteUser('${u.username}')">🗑️</button>` : ''}</td></tr>`).join('')}</tbody>
       </table>
     </div>`;
 }
@@ -1760,7 +2249,7 @@ function renderLogoUpload() {
   c.innerHTML = `
     <p><b>Logo de l'institution</b></p>
     ${DB.logo ? `<img src="${DB.logo}" style="max-width:200px; border:2px solid var(--primary);"><br><br>` : ''}
-    <label class="btn btn-success" style="display:inline-block;">📥 Choisir une image JPG<input type="file" accept=".jpg,.jpeg,.png" onchange="uploadLogo(event)" style="display:none;"></label>
+    <label class="btn btn-success" style="display:inline-block;">📥 Choisir une image<input type="file" accept=".jpg,.jpeg,.png" onchange="uploadLogo(event)" style="display:none;"></label>
     ${DB.logo ? `<button class="btn btn-delete" onclick="removeLogo()">🗑️ Supprimer</button>` : ''}`;
 }
 
@@ -1809,8 +2298,7 @@ function openAddBien(direction) {
   fillDatalist('listType', DB.modeles);
   fillDatalist('listBureau', DB.services);
   fillDatalist('listUtilisateur', DB.personnel);
-  const sel = document.getElementById('newDirection');
-  sel.innerHTML = DIRECTIONS.map(d => `<option ${d===direction?'selected':''}>${d}</option>`).join('');
+  document.getElementById('newDirection').innerHTML = DIRECTIONS.map(d => `<option ${d===direction?'selected':''}>${d}</option>`).join('');
   ['keepDesignation','keepEtat','keepFormat','keepAnnee','keepBureau','keepUtilisateur','freeCodeMat'].forEach(id => { document.getElementById(id).checked = false; });
   openModal('addBienModal');
   document.getElementById('newCodeMat').focus();
@@ -1825,8 +2313,7 @@ function onCodeMatInput() {
   if (!free && v.length > 6) document.getElementById('newCodeMat').value = v.substring(0, 6);
   if (v.length === 6 && !free) {
     const des = DB.nomenclature[v];
-    if (des) document.getElementById('newDesignation').value = des;
-    else document.getElementById('newDesignation').value = '';
+    document.getElementById('newDesignation').value = des || '';
     document.getElementById('newType').focus();
   } else if (!free) { document.getElementById('newDesignation').value = ''; }
   updateCodePreview();
@@ -1842,8 +2329,7 @@ function onNumeroInput() {
   const v = document.getElementById('newNumero').value;
   const free = document.getElementById('freeCodeMat').checked;
   if (v.length === 4) {
-    const padded = v.padStart(4, '0');
-    document.getElementById('newNumero').value = padded;
+    document.getElementById('newNumero').value = v.padStart(4, '0');
     updateCodePreview();
     if (!free) {
       setTimeout(() => {
@@ -1893,7 +2379,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function saveNewBien(force = false) {
   const codeMat = document.getElementById('codePreview').textContent;
   const free = document.getElementById('freeCodeMat').checked;
-  if (!free && (codeMat === '—' || !codeMat)) { alert('Veuillez compléter la saisie du Numéro (4 caractères).'); document.getElementById('newNumero').focus(); return; }
+  if (!free && (codeMat === '—' || !codeMat)) { alert('Veuillez compléter la saisie du Numéro.'); document.getElementById('newNumero').focus(); return; }
   const finalCode = free ? document.getElementById('newCodeMat').value : codeMat;
   if (!finalCode) { alert('Code matière invalide'); return; }
   if (!force && DB.biens.some(b => b['CODE MATIERE'] === finalCode)) { document.getElementById('duplicateWarning').style.display = 'block'; return; }
@@ -1960,27 +2446,18 @@ async function saveEditBien() {
 }
 
 async function deleteBien(id, btnElement) {
-  if (!isAdmin()) { alert('⛔ La suppression de biens est réservée aux administrateurs.'); return; }
+  if (!isAdmin()) { alert('⛔ Réservé aux administrateurs.'); return; }
   if (!confirm('Supprimer ce bien ?')) return;
-  if (btnElement) {
-    const row = btnElement.closest('tr');
-    if (row) { row.classList.add('row-deleting'); await new Promise(resolve => setTimeout(resolve, 600)); }
-  }
+  if (btnElement) { const row = btnElement.closest('tr'); if (row) { row.classList.add('row-deleting'); await new Promise(r => setTimeout(r, 600)); } }
   DB.biens = DB.biens.filter(x => x.id !== id);
   await saveDB(); refreshCurrentView(true);
 }
 
-async function deleteAllBiens(direction) {
-  if (!isAdmin()) { alert('⛔ La suppression de tous les biens est réservée aux administrateurs.'); return; }
-  if (!confirm('Supprimer TOUS les biens de ' + direction + ' ?')) return;
-  if (!confirm('Êtes-vous vraiment sûr ?')) return;
-  DB.biens = DB.biens.filter(b => b.direction !== direction);
-  await saveDB(); refreshCurrentView(true);
-}
-
 let importTargetDir = null;
+let pendingImportData = null;
+
 function openImport(direction) {
-  if (!isAdmin()) { alert('⛔ L\'importation de fichiers Excel est réservée aux administrateurs.'); return; }
+  if (!isAdmin()) { alert('⛔ Réservé aux administrateurs.'); return; }
   importTargetDir = direction;
   document.getElementById('importFile').value = '';
   document.getElementById('importSheet').innerHTML = '';
@@ -2000,7 +2477,7 @@ function openImport(direction) {
 }
 
 async function processImport() {
-  if (!isAdmin()) { alert('⛔ L\'importation de fichiers Excel est réservée aux administrateurs.'); return; }
+  if (!isAdmin()) { alert('⛔ Réservé aux administrateurs.'); return; }
   const file = document.getElementById('importFile').files[0];
   const sheet = document.getElementById('importSheet').value;
   const dir = document.getElementById('importDirection').value;
@@ -2013,22 +2490,36 @@ async function processImport() {
       const ws = wb.Sheets[sheet];
       const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
       if (rows.length < 2) { alert('Feuille vide'); return; }
-      const headers = rows[0].map(h => String(h||'').toUpperCase().trim());
-      let count = 0;
-      for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        if (!row || row.length === 0) continue;
-        const bien = { id: 'b_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2,5), direction: dir, checked: false, reforme: false, source: 'import' };
-        COLONNES.forEach((c, idx) => { const hIdx = headers.findIndex(h => h.includes(c.substring(0, 6))); bien[c] = hIdx >= 0 ? (row[hIdx]||'') : (row[idx]||''); });
-        if (!bien['DIRECTION REGIONALE']) bien['DIRECTION REGIONALE'] = dir;
-        if (!bien['DATE INVENTAIRE']) bien['DATE INVENTAIRE'] = new Date().toISOString().split('T')[0];
-        DB.biens.push(bien); count++;
-      }
-      await saveDB(); closeModal('importModal'); refreshCurrentView(true);
-      alert(count + ' bien(s) importé(s) !');
+      pendingImportData = { rows, dir, sheet };
+      requestPasswordVerification(
+        `Importer ${rows.length - 1} ligne(s) dans "${dir}"`,
+        () => executerImport(pendingImportData)
+      );
     } catch(err) { alert('Erreur : ' + err.message); }
   };
   reader.readAsArrayBuffer(file);
+}
+
+async function executerImport(importData) {
+  if (!importData) return;
+  const { rows, dir } = importData;
+  const headers = rows[0].map(h => String(h||'').toUpperCase().trim());
+  let count = 0;
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row || row.length === 0) continue;
+    const bien = { id: 'b_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2,5), direction: dir, checked: false, reforme: false, source: 'import' };
+    COLONNES.forEach((c, idx) => { const hIdx = headers.findIndex(h => h.includes(c.substring(0, 6))); bien[c] = hIdx >= 0 ? (row[hIdx]||'') : (row[idx]||''); });
+    if (!bien['DIRECTION REGIONALE']) bien['DIRECTION REGIONALE'] = dir;
+    if (!bien['DATE INVENTAIRE']) bien['DATE INVENTAIRE'] = new Date().toISOString().split('T')[0];
+    DB.biens.push(bien); count++;
+  }
+  DB.actions.push({ date: new Date().toISOString(), user: DB.currentUser?.username || 'inconnu', action: `Importation de ${count} bien(s) dans ${dir}` });
+  await saveDB();
+  closeModal('importModal');
+  refreshCurrentView(true);
+  alert(`✅ ${count} bien(s) importé(s) !`);
+  pendingImportData = null;
 }
 
 function exportSynthese(direction, onlyChecked) {
@@ -2097,16 +2588,18 @@ function exportAllData() {
 async function importAllData(event) {
   const file = event.target.files[0];
   if (!file) return;
-  if (!confirm('Cela remplacera TOUTES les données actuelles. Continuer ?')) return;
-  const reader = new FileReader();
-  reader.onload = async e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (!data || !data.biens) throw new Error('Fichier invalide');
-      DB = data; await saveDB(); alert('Données importées avec succès !'); location.reload();
-    } catch(err) { alert('Fichier invalide : ' + err.message); }
-  };
-  reader.readAsText(file);
+  if (!confirm('Cela remplacera TOUTES les données. Continuer ?')) return;
+  requestPasswordVerification('Importer toutes les données depuis JSON', async () => {
+    const reader = new FileReader();
+    reader.onload = async e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data || !data.biens) throw new Error('Fichier invalide');
+        DB = data; await saveDB(); alert('✅ Données importées !'); location.reload();
+      } catch(err) { alert('Fichier invalide : ' + err.message); }
+    };
+    reader.readAsText(file);
+  });
 }
 
 function exportExcelPatrimoine() {
@@ -2132,7 +2625,7 @@ async function changePassword() {
   if (n1 !== n2) { alert('Les mots de passe ne correspondent pas'); return; }
   if (n1.length < 3) { alert('Mot de passe trop court'); return; }
   user.password = n1;
-  await saveDB(); closeModal('passwordModal'); alert('Mot de passe modifié !');
+  await saveDB(); closeModal('passwordModal'); alert('✅ Mot de passe modifié !');
 }
 
 function openModal(id) { document.getElementById(id).classList.add('show'); makeDraggable(document.getElementById(id).querySelector('.modal')); }
@@ -2185,7 +2678,7 @@ document.addEventListener('keydown', e => {
     }
   } catch(e) {
     console.error('Erreur de démarrage :', e);
-    alert('Erreur de démarrage. Vérifiez votre connexion Internet et rechargez la page.');
+    alert('Erreur de démarrage. Vérifiez votre connexion Internet.');
   }
 })();
 </script>
