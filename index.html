@@ -263,24 +263,41 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
 
 .notification-dot { display: inline-block; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; margin-left: 5px; }
 
-/* Notification de sauvegarde en série */
 .save-notification {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: var(--success);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
+  position: fixed; top: 20px; right: 20px;
+  background: var(--success); color: white;
+  padding: 12px 20px; border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  z-index: 99998;
-  font-size: 13px;
-  font-weight: bold;
+  z-index: 99998; font-size: 13px; font-weight: bold;
   animation: slideIn 0.3s ease;
 }
 @keyframes slideIn {
   from { transform: translateX(400px); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+/* Indicateur de mode saisie libre pour la désignation */
+.designation-libre-indicator {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+.designation-auto-indicator {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #dbeafe;
+  color: #1e3a8a;
+  border: 1px solid #3b82f6;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  margin-left: 8px;
 }
 </style>
 </head>
@@ -324,7 +341,7 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
     <div class="modal-header"><h3>➕ Ajouter un nouveau bien</h3><button class="modal-close" onclick="closeModal('addBienModal')">×</button></div>
     <div class="modal-body">
       <div class="form-line">
-        <div><label>Code matière</label><input type="text" id="newCodeMat" maxlength="6" oninput="onCodeMatInput()"></div>
+        <div><label>Code matière <span id="codeMatModeIndicator" class="designation-auto-indicator">Auto</span></label><input type="text" id="newCodeMat" maxlength="6" oninput="onCodeMatInput()"></div>
         <div><label>Désignation</label><input type="text" id="newDesignation" readonly style="background:#f3f4f6;"></div>
         <div><label>Modèle</label><input type="text" id="newType" list="listType"><datalist id="listType"></datalist></div>
         <div><label>Quantité</label><input type="text" id="newQte" value="1" readonly style="background:#f3f4f6;" tabindex="-1"></div>
@@ -360,6 +377,9 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
       <div id="duplicateWarning" style="display:none; margin-top:15px; padding:10px; background:#fee2e2; border:2px solid var(--danger); border-radius:6px;">
         ⚠️ <b>Code matière déjà existant !</b>
         <button class="btn btn-edit" onclick="forceSaveDuplicate()" style="margin-left:10px;">Enregistrer quand même (Bis)</button>
+      </div>
+      <div id="libreModeInfo" style="display:none; margin-top:10px; padding:10px; background:#fef3c7; border:2px solid var(--warning); border-radius:6px; font-size:11px; color:#92400e;">
+        💡 <b>Mode saisie libre activé :</b> Le champ Désignation est maintenant éditable. Vous pouvez saisir librement la désignation.
       </div>
     </div>
     <div class="modal-footer">
@@ -2227,6 +2247,8 @@ function openAddBien(direction) {
   document.getElementById('newCodeMat').readOnly = false;
   document.getElementById('newCodeMat').setAttribute('maxlength', '6');
   document.getElementById('newDesignation').value = '';
+  document.getElementById('newDesignation').readOnly = true;
+  document.getElementById('newDesignation').style.background = '#f3f4f6';
   document.getElementById('newType').value = '';
   document.getElementById('newQte').value = '1';
   document.getElementById('newEtat').value = '';
@@ -2239,6 +2261,8 @@ function openAddBien(direction) {
   document.getElementById('newDateInv').value = new Date().toISOString().split('T')[0];
   document.getElementById('codePreview').textContent = '—';
   document.getElementById('duplicateWarning').style.display = 'none';
+  document.getElementById('libreModeInfo').style.display = 'none';
+  updateCodeMatModeIndicator(false);
   fillDatalist('listType', DB.modeles);
   fillDatalist('listBureau', DB.services);
   fillDatalist('listUtilisateur', DB.personnel);
@@ -2250,18 +2274,76 @@ function openAddBien(direction) {
 
 function fillDatalist(id, items) { document.getElementById(id).innerHTML = (items || []).map(i => `<option value="${i}">`).join(''); }
 
+// ===== NOUVELLE FONCTION : Mise à jour de l'indicateur de mode =====
+function updateCodeMatModeIndicator(isLibre) {
+  const indicator = document.getElementById('codeMatModeIndicator');
+  if (!indicator) return;
+  if (isLibre) {
+    indicator.textContent = 'Libre (.99)';
+    indicator.className = 'designation-libre-indicator';
+  } else {
+    indicator.textContent = 'Auto';
+    indicator.className = 'designation-auto-indicator';
+  }
+}
+
+// ===== MODIFIÉ : Détection du suffixe ".99" pour activer la saisie libre =====
 function onCodeMatInput() {
   const v = document.getElementById('newCodeMat').value.toUpperCase();
   document.getElementById('newCodeMat').value = v;
   const free = document.getElementById('freeCodeMat').checked;
+  
+  // Détection du suffixe ".99" → mode saisie libre
+  const endsWith99 = v.endsWith('.99');
+  const designationField = document.getElementById('newDesignation');
+  const libreModeInfo = document.getElementById('libreModeInfo');
+  
   if (!free && v.length > 6) document.getElementById('newCodeMat').value = v.substring(0, 6);
-  if (v.length === 6 && !free) {
-    const des = DB.nomenclature[v];
-    document.getElementById('newDesignation').value = des || '';
-    document.getElementById('newType').focus();
-  } else if (!free) { document.getElementById('newDesignation').value = ''; }
+  
+  // Si le code se termine par ".99" OU si la case "Libre" est cochée → saisie libre
+  if (endsWith99 || free) {
+    // Mode saisie libre : désignation éditable
+    designationField.readOnly = false;
+    designationField.style.background = 'white';
+    designationField.style.border = '2px solid #f59e0b';
+    libreModeInfo.style.display = 'block';
+    updateCodeMatModeIndicator(true);
+    
+    // Si on vient de passer en mode libre (première détection de .99), focus sur désignation
+    if (endsWith99 && v.length >= 3) {
+      // Ne pas vider la désignation si l'utilisateur a déjà commencé à la saisir
+      if (designationField.value === '' || !designationField.dataset.userEdited) {
+        designationField.value = '';
+        designationField.focus();
+      }
+    }
+  } else if (!free) {
+    // Mode automatique : désignation en lecture seule
+    designationField.readOnly = true;
+    designationField.style.background = '#f3f4f6';
+    designationField.style.border = '2px solid var(--primary)';
+    libreModeInfo.style.display = 'none';
+    updateCodeMatModeIndicator(false);
+    
+    if (v.length === 6) {
+      const des = DB.nomenclature[v];
+      designationField.value = des || '';
+      document.getElementById('newType').focus();
+    } else {
+      designationField.value = '';
+    }
+  }
+  
+  delete designationField.dataset.userEdited;
   updateCodePreview();
 }
+
+// Marquer que l'utilisateur a modifié manuellement la désignation (en mode libre)
+document.addEventListener('input', function(e) {
+  if (e.target.id === 'newDesignation') {
+    e.target.dataset.userEdited = 'true';
+  }
+});
 
 function onAnneeInput() {
   const v = document.getElementById('newAnnee').value;
@@ -2272,10 +2354,11 @@ function onAnneeInput() {
 function onNumeroInput() {
   const v = document.getElementById('newNumero').value;
   const free = document.getElementById('freeCodeMat').checked;
+  const endsWith99 = document.getElementById('newCodeMat').value.toUpperCase().endsWith('.99');
   if (v.length === 4) {
     document.getElementById('newNumero').value = v.padStart(4, '0');
     updateCodePreview();
-    if (!free) {
+    if (!free && !endsWith99) {
       setTimeout(() => {
         const code = document.getElementById('codePreview').textContent;
         if (code !== '—' && DB.biens.some(b => b['CODE MATIERE'] === code)) {
@@ -2313,21 +2396,52 @@ document.addEventListener('DOMContentLoaded', () => {
   if (freeCheckbox) {
     freeCheckbox.addEventListener('change', function() {
       const codeInput = document.getElementById('newCodeMat');
-      if (this.checked) { codeInput.removeAttribute('maxlength'); }
-      else { codeInput.setAttribute('maxlength', '6'); if (codeInput.value.length > 6) codeInput.value = codeInput.value.substring(0, 6); }
+      const designationField = document.getElementById('newDesignation');
+      const libreModeInfo = document.getElementById('libreModeInfo');
+      
+      if (this.checked) {
+        codeInput.removeAttribute('maxlength');
+        // Mode libre : désignation éditable
+        designationField.readOnly = false;
+        designationField.style.background = 'white';
+        designationField.style.border = '2px solid #f59e0b';
+        libreModeInfo.style.display = 'block';
+        updateCodeMatModeIndicator(true);
+      } else {
+        codeInput.setAttribute('maxlength', '6');
+        if (codeInput.value.length > 6) codeInput.value = codeInput.value.substring(0, 6);
+        // Vérifier si le code se termine par ".99" pour garder le mode libre
+        const endsWith99 = codeInput.value.toUpperCase().endsWith('.99');
+        if (!endsWith99) {
+          designationField.readOnly = true;
+          designationField.style.background = '#f3f4f6';
+          designationField.style.border = '2px solid var(--primary)';
+          libreModeInfo.style.display = 'none';
+          updateCodeMatModeIndicator(false);
+        }
+      }
       updateCodePreview();
     });
   }
 });
 
-// ===== MODIFIÉ : Le modal reste ouvert après enregistrement =====
 async function saveNewBien(force = false) {
   const codeMat = document.getElementById('codePreview').textContent;
   const free = document.getElementById('freeCodeMat').checked;
-  if (!free && (codeMat === '—' || !codeMat)) { alert('Veuillez compléter la saisie du Numéro (4 caractères).'); document.getElementById('newNumero').focus(); return; }
-  const finalCode = free ? document.getElementById('newCodeMat').value : codeMat;
-  if (!finalCode) { alert('Code matière invalide'); return; }
-  if (!force && DB.biens.some(b => b['CODE MATIERE'] === finalCode)) { document.getElementById('duplicateWarning').style.display = 'block'; return; }
+  const endsWith99 = document.getElementById('newCodeMat').value.toUpperCase().endsWith('.99');
+  
+  // En mode ".99" libre, on utilise directement le code matière saisi
+  const finalCode = (free || endsWith99) ? document.getElementById('newCodeMat').value : codeMat;
+  
+  if (!finalCode || finalCode === '—') { 
+    alert('Veuillez compléter la saisie du Numéro (4 caractères).'); 
+    document.getElementById('newNumero').focus(); 
+    return; 
+  }
+  if (!force && DB.biens.some(b => b['CODE MATIERE'] === finalCode)) { 
+    document.getElementById('duplicateWarning').style.display = 'block'; 
+    return; 
+  }
   const bien = {
     id: 'b_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
     direction: document.getElementById('newDirection').value,
@@ -2350,8 +2464,12 @@ async function saveNewBien(force = false) {
   const keepBureau = document.getElementById('keepBureau').checked;
   const keepUtilisateur = document.getElementById('keepUtilisateur').checked;
   
-  // Vider uniquement les champs non cochés
-  if (!keepDes) { document.getElementById('newCodeMat').value = ''; document.getElementById('newCodeMat').readOnly = false; document.getElementById('newDesignation').value = ''; document.getElementById('newType').value = ''; }
+  if (!keepDes) { 
+    document.getElementById('newCodeMat').value = ''; 
+    document.getElementById('newCodeMat').readOnly = false; 
+    document.getElementById('newDesignation').value = ''; 
+    document.getElementById('newType').value = ''; 
+  }
   if (!keepEtat) document.getElementById('newEtat').value = '';
   if (!keepFormat) document.getElementById('newFormat').value = '';
   if (!keepAnnee) document.getElementById('newAnnee').value = '';
@@ -2374,7 +2492,7 @@ async function saveNewBien(force = false) {
   else document.getElementById('newNumero').focus();
   
   updateCodePreview();
-  // ⚠️ Le modal NE SE FERME PAS - il reste ouvert pour de nouvelles saisies
+  // ⚠️ Le modal NE SE FERME PAS
   refreshCurrentView(true);
 }
 
