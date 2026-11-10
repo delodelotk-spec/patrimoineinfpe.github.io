@@ -11,7 +11,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; background: var(--bg); color: #1a202c; }
 
-/* ===== INFOBULES : 9pt, fond bleu clair, à DROITE et légèrement en BAS ===== */
 [data-tooltip] { position: relative; cursor: help; }
 [data-tooltip]:hover::after {
   content: attr(data-tooltip);
@@ -100,11 +99,17 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
 .btn-doublons { background: #dc2626; padding: 6px 12px; }
 .btn-whatsapp { background: #128c7e; padding: 6px 12px; }
 .btn-close-modal { background: #6b7280; padding: 8px 16px; }
+.btn-replace { background: #7c3aed; padding: 6px 12px; }
 .btn:hover { opacity: 0.85; }
 
-.search-bar { display: flex; gap: 10px; flex-wrap: wrap; padding: 10px; background: white; border: 2px solid red; border-radius: 4px; margin-bottom: 10px; }
+.search-bar { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px; background: white; border: 2px solid red; border-radius: 4px; margin-bottom: 10px; align-items: center; }
 .search-bar input, .search-bar select { padding: 6px; border: 2px solid var(--primary); border-radius: 4px; font-size: 12px; }
 .search-count { padding: 6px 12px; background: var(--success); color: white; border-radius: 4px; font-weight: bold; font-size: 12px; }
+
+.replace-bar { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px; background: #fef3c7; border: 2px solid var(--warning); border-radius: 4px; margin-bottom: 10px; align-items: center; }
+.replace-bar label { font-weight: bold; color: #92400e; font-size: 11px; }
+.replace-bar input { padding: 6px; border: 2px solid var(--warning); border-radius: 4px; font-size: 12px; }
+.replace-arrow { font-size: 16px; color: #92400e; font-weight: bold; }
 
 .sub-tabs { display: flex; gap: 2px; margin-bottom: 10px; border-bottom: 2px solid var(--primary); flex-wrap: wrap; }
 .sub-tab-btn { padding: 8px 14px; background: #e0e7ff; border: none; cursor: pointer; font-size: 12px; color: var(--primary); border-radius: 4px 4px 0 0; }
@@ -297,6 +302,14 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
   font-size: 11px;
   font-weight: bold;
   margin-left: 8px;
+}
+
+.code-highlight {
+  background: #fef08a;
+  padding: 1px 2px;
+  border-radius: 2px;
+  font-weight: bold;
+  color: #854d0e;
 }
 </style>
 </head>
@@ -615,7 +628,7 @@ function showSaveNotification(text) {
   notif.className = 'save-notification';
   notif.textContent = text;
   document.body.appendChild(notif);
-  setTimeout(() => { notif.style.opacity = '0'; setTimeout(() => notif.remove(), 300); }, 2000);
+  setTimeout(() => { notif.style.opacity = '0'; setTimeout(() => notif.remove(), 300); }, 2500);
 }
 
 function updateStorageIndicator() {
@@ -930,7 +943,7 @@ function showSubTab(tabId, sub, btn) {
 
 function refreshCurrentView(preserveSearch = true) {
   const savedSearches = {};
-  if (preserveSearch) document.querySelectorAll('.search-bar input').forEach(input => { savedSearches[input.id] = input.value; });
+  if (preserveSearch) document.querySelectorAll('.search-bar input, .replace-bar input').forEach(input => { savedSearches[input.id] = input.value; });
   if (currentTab === 'dashboard') renderDashboard();
   else if (currentTab === 'resume') renderResume();
   else if (currentTab === 'resumeNonCoches') renderResumeNonCoches();
@@ -948,8 +961,8 @@ function refreshCurrentView(preserveSearch = true) {
         if (input) {
           input.value = savedSearches[id];
           if (savedSearches[id]) {
-            const containerId = id.replace(/_search_(code|annee|numero|general)$/, '');
-            if (document.getElementById(containerId)) filterTable(containerId);
+            const containerId = id.replace(/_search_(code|codefind|annee|numero|general)$/, '').replace(/_replace_(codefind|codereplace)$/, '');
+            if (document.getElementById(containerId + '_table')) filterTable(containerId);
           }
         }
       });
@@ -1304,12 +1317,14 @@ function renderDirectionTab(direction) {
   renderReformes(direction, tabId + '_reformes');
 }
 
+// ===== renderBiensList avec barre de recherche + barre de remplacement =====
 function renderBiensList(direction, containerId, filterChecked, checkedValue, exportSuffix) {
   const container = document.getElementById(containerId);
   if (!container) return;
   let biens = DB.biens.filter(b => b.direction === direction && !b.reforme);
   if (filterChecked !== null) biens = biens.filter(b => b.checked === checkedValue);
   const searchId = containerId + '_search';
+  const replaceId = containerId + '_replace';
   const tableId = containerId + '_table';
   container.innerHTML = `
     <div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
@@ -1317,13 +1332,22 @@ function renderBiensList(direction, containerId, filterChecked, checkedValue, ex
       <button class="btn btn-export" onclick="exportBiensList('${direction}', ${filterChecked}, ${checkedValue}, '${exportSuffix}')">📊 Exporter Excel</button>
     </div>
     <div class="search-bar">
-      <input type="text" id="${searchId}_code" placeholder="Code (6 car.)" maxlength="6" oninput="filterTable('${containerId}')" style="width:90px;">
-      <input type="text" id="${searchId}_annee" placeholder="Année (4 car.)" maxlength="4" oninput="filterTable('${containerId}')" style="width:90px;">
-      <input type="text" id="${searchId}_numero" placeholder="Numéro (4 car.)" maxlength="4" oninput="filterTable('${containerId}')" style="width:90px;">
-      <input type="text" id="${searchId}_general" placeholder="🔍 Recherche (Désignation/Bureau/Utilisateur)..." oninput="filterTable('${containerId}')" style="flex:1; min-width:200px;">
+      <input type="text" id="${searchId}_code" placeholder="Code (débute par)" maxlength="6" oninput="filterTable('${containerId}')" style="width:120px;" data-tooltip="Recherche les codes qui COMMENCENT par ces caractères">
+      <input type="text" id="${searchId}_codefind" placeholder="🔎 Code contient..." oninput="filterTable('${containerId}')" style="flex:1; min-width:150px;" data-tooltip="Recherche un groupe de caractères N'IMPORTE OÙ dans le code matière">
+      <input type="text" id="${searchId}_annee" placeholder="Année" maxlength="4" oninput="filterTable('${containerId}')" style="width:80px;">
+      <input type="text" id="${searchId}_numero" placeholder="Numéro" maxlength="4" oninput="filterTable('${containerId}')" style="width:80px;">
+      <input type="text" id="${searchId}_general" placeholder="🔍 Désignation/Bureau/Utilisateur..." oninput="filterTable('${containerId}')" style="flex:2; min-width:200px;">
       <div class="search-count" id="${searchId}_count">${biens.length} bien(s)</div>
       <button class="btn btn-primary" onclick="toggleAllCheck('${containerId}')">☑️ Tout cocher/décocher</button>
       <button class="btn" style="background:#6b7280; color:white;" onclick="chooseColumns('${containerId}')">👁️ Colonnes</button>
+    </div>
+    <div class="replace-bar">
+      <label>🔁 Remplacement dans le code matière :</label>
+      <input type="text" id="${replaceId}_codefind" placeholder="Rechercher..." style="width:150px;" data-tooltip="Groupe de caractères à REMPLACER dans le code matière">
+      <span class="replace-arrow">➜</span>
+      <input type="text" id="${replaceId}_codereplace" placeholder="Remplacer par..." style="width:150px;" data-tooltip="NOUVEAUX caractères qui remplaceront ceux recherchés">
+      <button class="btn btn-replace" onclick="executerRemplacementCode('${containerId}', '${direction}')" data-tooltip="Effectuer le remplacement sur tous les biens filtrés">🔄 Remplacer</button>
+      <span id="${replaceId}_status" style="font-size:11px; color:#6b7280;"></span>
     </div>
     <div class="checkbox-grid" id="${containerId}_colCheck" style="display:none;"></div>
     <div class="table-wrapper"><table class="patrimoine-table" id="${tableId}"><thead><tr id="${tableId}_head"></tr></thead><tbody id="${tableId}_body"></tbody></table></div>
@@ -1335,6 +1359,87 @@ function renderBiensList(direction, containerId, filterChecked, checkedValue, ex
   fillTableHead(containerId); 
   paginationState[containerId] = { page: 1, pageSize: 100, total: biens.length };
   renderPaginatedTable(containerId, biens);
+}
+
+// ===== NOUVELLE FONCTION : Exécuter le remplacement dans les codes matière =====
+async function executerRemplacementCode(containerId, direction) {
+  const replaceId = containerId + '_replace';
+  const searchId = containerId + '_search';
+  const findText = document.getElementById(replaceId + '_codefind').value;
+  const replaceText = document.getElementById(replaceId + '_codereplace').value;
+  const statusEl = document.getElementById(replaceId + '_status');
+  
+  if (!findText) {
+    alert('❌ Veuillez saisir le texte à rechercher dans le champ "Rechercher...".');
+    return;
+  }
+  
+  // Filtrer les biens de la direction courante qui contiennent le texte recherché
+  const biensConcernes = DB.biens.filter(b => 
+    b.direction === direction && 
+    !b.reforme && 
+    (b['CODE MATIERE'] || '').includes(findText)
+  );
+  
+  if (biensConcernes.length === 0) {
+    statusEl.textContent = '⚠️ Aucun bien trouvé avec ce texte dans son code matière.';
+    statusEl.style.color = '#dc2626';
+    setTimeout(() => { statusEl.textContent = ''; }, 4000);
+    return;
+  }
+  
+  // Aperçu du remplacement
+  const apercu = biensConcernes.slice(0, 3).map(b => {
+    const ancien = b['CODE MATIERE'] || '';
+    const nouveau = ancien.split(findText).join(replaceText);
+    return `${ancien} → ${nouveau}`;
+  }).join('\n');
+  
+  const messageConfirm = `🔄 Remplacement dans le code matière\n\n` +
+    `Rechercher : "${findText}"\n` +
+    `Remplacer par : "${replaceText || '(vide)'}"\n\n` +
+    `⚠️ ${biensConcernes.length} bien(s) seront modifié(s).\n\n` +
+    `Aperçu (3 premiers) :\n${apercu}${biensConcernes.length > 3 ? '\n...' : ''}\n\n` +
+    `Confirmer le remplacement ?`;
+  
+  if (!confirm(messageConfirm)) return;
+  
+  // Exécuter le remplacement
+  let count = 0;
+  const anciensCodes = [];
+  biensConcernes.forEach(b => {
+    const ancien = b['CODE MATIERE'] || '';
+    const nouveau = ancien.split(findText).join(replaceText);
+    if (ancien !== nouveau) {
+      anciensCodes.push({ id: b.id, ancien, nouveau });
+      b['CODE MATIERE'] = nouveau;
+      count++;
+    }
+  });
+  
+  // Journaliser l'action
+  DB.actions.push({
+    date: new Date().toISOString(),
+    user: DB.currentUser?.username || 'inconnu',
+    action: `Remplacement dans codes matière : "${findText}" → "${replaceText}" (${count} bien(s) modifié(s)) dans ${direction}`,
+    details: anciensCodes
+  });
+  
+  await saveDB();
+  
+  statusEl.textContent = `✅ ${count} bien(s) modifié(s) avec succès !`;
+  statusEl.style.color = '#059669';
+  showSaveNotification(`✅ ${count} code(s) matière modifié(s) !`);
+  
+  // Vider les champs de remplacement
+  document.getElementById(replaceId + '_codefind').value = '';
+  document.getElementById(replaceId + '_codereplace').value = '';
+  
+  // Rafraîchir la vue
+  setTimeout(() => {
+    statusEl.textContent = '';
+    refreshCurrentView(true);
+  }, 3000);
 }
 
 function renderPaginatedTable(containerId, biens) {
@@ -1412,11 +1517,23 @@ function fillTableHead(containerId) {
   head.innerHTML = window.visibleCols[containerId].map(c => `<th>${c}</th>`).join('');
 }
 
+function highlightCode(code, search) {
+  if (!search || !code) return code || '';
+  const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedSearch})`, 'gi');
+  return (code || '').replace(regex, '<span class="code-highlight">$1</span>');
+}
+
 function fillTableBody(containerId, biens) {
   const body = document.getElementById(containerId + '_table_body');
   const cols = window.visibleCols[containerId];
   const isExistants = containerId.includes('_existants');
   const admin = isAdmin();
+  
+  const searchId = containerId + '_search';
+  const codeFindEl = document.getElementById(searchId + '_codefind');
+  const codeFind = codeFindEl ? codeFindEl.value.trim() : '';
+  
   let html = '';
   biens.forEach(b => {
     html += `<tr ondblclick="toggleCheckByDoubleClick('${b.id}', '${containerId}')">`;
@@ -1428,7 +1545,11 @@ function fillTableBody(containerId, biens) {
           ${admin && !isExistants ? `<button class="btn btn-delete" onclick="deleteBien('${b.id}', this)">🗑️</button>` : ''}
           ${!isExistants ? `<button class="btn btn-reforme" onclick="proposeReforme('${b.id}', this)">🔄</button>` : ''}
         </td>`;
-      } else { html += `<td>${b[c] || ''}</td>`; }
+      } else if (c === 'CODE MATIERE' && codeFind) {
+        html += `<td>${highlightCode(b[c] || '', codeFind)}</td>`;
+      } else { 
+        html += `<td>${b[c] || ''}</td>`; 
+      }
     });
     html += '</tr>';
   });
@@ -1447,11 +1568,15 @@ function filterTable(containerId) {
   const container = document.getElementById(containerId);
   const searchId = containerId + '_search';
   const code = document.getElementById(searchId + '_code').value.trim().toUpperCase();
+  const codeFind = document.getElementById(searchId + '_codefind').value.trim().toUpperCase();
   const annee = document.getElementById(searchId + '_annee').value.trim();
   const numero = document.getElementById(searchId + '_numero').value.trim();
   const general = document.getElementById(searchId + '_general').value.trim().toLowerCase();
+  
   let biens = JSON.parse(container.dataset.biens);
+  
   if (code) biens = biens.filter(b => (b['CODE MATIERE'] || '').toUpperCase().startsWith(code));
+  if (codeFind) biens = biens.filter(b => (b['CODE MATIERE'] || '').toUpperCase().includes(codeFind));
   if (annee) biens = biens.filter(b => (b['ANNEE D\'ACQUISITION'] || '').includes(annee));
   if (numero) biens = biens.filter(b => (b['CODE MATIERE'] || '').slice(-4).includes(numero));
   if (general) biens = biens.filter(b => {
@@ -1460,6 +1585,7 @@ function filterTable(containerId) {
     const u = (b['UTILISATEUR'] || '').toLowerCase();
     return d.includes(general) || bu.includes(general) || u.includes(general);
   });
+  
   document.getElementById(searchId + '_count').textContent = biens.length + ' bien(s)';
   paginationState[containerId] = { page: 1, pageSize: paginationState[containerId]?.pageSize || 100, total: biens.length };
   renderPaginatedTable(containerId, biens);
@@ -1615,12 +1741,21 @@ function renderGeneralList() {
       <button class="btn btn-export" onclick="exportGeneralList()">📊 Exporter Excel</button>
     </div>
     <div class="search-bar">
-      <input type="text" id="general_search_code" placeholder="Code" maxlength="6" oninput="filterTable('general_liste')" style="width:80px;">
-      <input type="text" id="general_search_annee" placeholder="Année" maxlength="4" oninput="filterTable('general_liste')" style="width:70px;">
-      <input type="text" id="general_search_numero" placeholder="Numéro" maxlength="4" oninput="filterTable('general_liste')" style="width:70px;">
-      <input type="text" id="general_search_general" placeholder="🔍 Recherche..." oninput="filterTable('general_liste')" style="flex:1;">
+      <input type="text" id="general_search_code" placeholder="Code (débute par)" maxlength="6" oninput="filterTable('general_liste')" style="width:120px;" data-tooltip="Recherche les codes qui COMMENCENT par ces caractères">
+      <input type="text" id="general_search_codefind" placeholder="🔎 Code contient..." oninput="filterTable('general_liste')" style="flex:1; min-width:150px;" data-tooltip="Recherche un groupe de caractères N'IMPORTE OÙ dans le code matière">
+      <input type="text" id="general_search_annee" placeholder="Année" maxlength="4" oninput="filterTable('general_liste')" style="width:80px;">
+      <input type="text" id="general_search_numero" placeholder="Numéro" maxlength="4" oninput="filterTable('general_liste')" style="width:80px;">
+      <input type="text" id="general_search_general" placeholder="🔍 Désignation/Bureau/Utilisateur..." oninput="filterTable('general_liste')" style="flex:2;">
       <div class="search-count" id="general_search_count">${biens.length} bien(s)</div>
       <button class="btn" style="background:#6b7280; color:white;" onclick="chooseColumns('general_liste')">👁️ Colonnes</button>
+    </div>
+    <div class="replace-bar">
+      <label>🔁 Remplacement dans le code matière (toutes directions) :</label>
+      <input type="text" id="general_replace_codefind" placeholder="Rechercher..." style="width:150px;" data-tooltip="Groupe de caractères à REMPLACER dans le code matière">
+      <span class="replace-arrow">➜</span>
+      <input type="text" id="general_replace_codereplace" placeholder="Remplacer par..." style="width:150px;" data-tooltip="NOUVEAUX caractères qui remplaceront ceux recherchés">
+      <button class="btn btn-replace" onclick="executerRemplacementCodeGeneral()" data-tooltip="Effectuer le remplacement sur tous les biens (toutes directions)">🔄 Remplacer</button>
+      <span id="general_replace_status" style="font-size:11px; color:#6b7280;"></span>
     </div>
     <div class="table-wrapper"><table class="patrimoine-table" id="general_liste_table"><thead><tr id="general_liste_table_head"></tr></thead><tbody id="general_liste_table_body"></tbody></table></div>
     <div class="pagination-controls" id="general_liste_pagination"></div>`;
@@ -1630,6 +1765,77 @@ function renderGeneralList() {
   paginationState['general_liste'] = { page: 1, pageSize: 100, total: biens.length };
   renderPaginatedTable('general_liste', biens);
   renderGeneralSynthese(); renderGeneralConfrontation();
+}
+
+// ===== Remplacement dans la liste générale (toutes directions) =====
+async function executerRemplacementCodeGeneral() {
+  const findText = document.getElementById('general_replace_codefind').value;
+  const replaceText = document.getElementById('general_replace_codereplace').value;
+  const statusEl = document.getElementById('general_replace_status');
+  
+  if (!findText) {
+    alert('❌ Veuillez saisir le texte à rechercher.');
+    return;
+  }
+  
+  const biensConcernes = DB.biens.filter(b => 
+    !b.reforme && (b['CODE MATIERE'] || '').includes(findText)
+  );
+  
+  if (biensConcernes.length === 0) {
+    statusEl.textContent = '⚠️ Aucun bien trouvé avec ce texte.';
+    statusEl.style.color = '#dc2626';
+    setTimeout(() => { statusEl.textContent = ''; }, 4000);
+    return;
+  }
+  
+  const apercu = biensConcernes.slice(0, 3).map(b => {
+    const ancien = b['CODE MATIERE'] || '';
+    const nouveau = ancien.split(findText).join(replaceText);
+    return `${ancien} → ${nouveau}`;
+  }).join('\n');
+  
+  const messageConfirm = `🔄 Remplacement GLOBAL dans tous les codes matière\n\n` +
+    `Rechercher : "${findText}"\n` +
+    `Remplacer par : "${replaceText || '(vide)'}"\n\n` +
+    `⚠️ ${biensConcernes.length} bien(s) seront modifié(s) dans TOUTES les directions.\n\n` +
+    `Aperçu (3 premiers) :\n${apercu}${biensConcernes.length > 3 ? '\n...' : ''}\n\n` +
+    `Confirmer le remplacement ?`;
+  
+  if (!confirm(messageConfirm)) return;
+  
+  let count = 0;
+  const anciensCodes = [];
+  biensConcernes.forEach(b => {
+    const ancien = b['CODE MATIERE'] || '';
+    const nouveau = ancien.split(findText).join(replaceText);
+    if (ancien !== nouveau) {
+      anciensCodes.push({ id: b.id, ancien, nouveau, direction: b.direction });
+      b['CODE MATIERE'] = nouveau;
+      count++;
+    }
+  });
+  
+  DB.actions.push({
+    date: new Date().toISOString(),
+    user: DB.currentUser?.username || 'inconnu',
+    action: `Remplacement GLOBAL dans codes matière : "${findText}" → "${replaceText}" (${count} bien(s) modifié(s))`,
+    details: anciensCodes
+  });
+  
+  await saveDB();
+  
+  statusEl.textContent = `✅ ${count} bien(s) modifié(s) avec succès !`;
+  statusEl.style.color = '#059669';
+  showSaveNotification(`✅ ${count} code(s) matière modifié(s) !`);
+  
+  document.getElementById('general_replace_codefind').value = '';
+  document.getElementById('general_replace_codereplace').value = '';
+  
+  setTimeout(() => {
+    statusEl.textContent = '';
+    refreshCurrentView(true);
+  }, 3000);
 }
 
 function exportGeneralList() {
@@ -2413,7 +2619,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ===== MODIFIÉ : Enregistrement + COCHAGE AUTOMATIQUE + modal reste ouvert =====
 async function saveNewBien(force = false) {
   const codeMat = document.getElementById('codePreview').textContent;
   const free = document.getElementById('freeCodeMat').checked;
@@ -2431,7 +2636,6 @@ async function saveNewBien(force = false) {
     return; 
   }
   
-  // ⭐ NOUVEAU : Le bien est créé avec checked: true (coché comme existant)
   const bien = {
     id: 'b_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
     direction: document.getElementById('newDirection').value,
@@ -2443,7 +2647,7 @@ async function saveNewBien(force = false) {
     'UTILISATEUR': document.getElementById('newUtilisateur').value,
     'DIRECTION REGIONALE': document.getElementById('newDirection').value,
     'DATE INVENTAIRE': document.getElementById('newDateInv').value || new Date().toISOString().split('T')[0],
-    checked: true, // ⭐ COCHÉ AUTOMATIQUEMENT
+    checked: true,
     reforme: false, 
     source: 'saisie'
   };
@@ -2472,10 +2676,8 @@ async function saveNewBien(force = false) {
   document.getElementById('newDateInv').value = new Date().toISOString().split('T')[0];
   document.getElementById('duplicateWarning').style.display = 'none';
   
-  // Notification visuelle
   showSaveNotification(`✅ Bien enregistré et COCHÉ ! Code: ${finalCode}`);
   
-  // Replacer le focus pour la saisie suivante
   if (keepDes && keepAnnee) document.getElementById('newNumero').focus();
   else if (keepDes && !keepEtat) document.getElementById('newEtat').focus();
   else if (keepDes && keepEtat && !keepFormat) document.getElementById('newFormat').focus();
@@ -2485,7 +2687,6 @@ async function saveNewBien(force = false) {
   else document.getElementById('newNumero').focus();
   
   updateCodePreview();
-  // ⚠️ Le modal NE SE FERME PAS - il reste ouvert pour de nouvelles saisies
   refreshCurrentView(true);
 }
 
@@ -2721,7 +2922,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     const anyModalOpen = document.querySelector('.modal-overlay.show');
     if (!anyModalOpen) {
-      document.querySelectorAll('.search-bar input').forEach(i => i.value = '');
+      document.querySelectorAll('.search-bar input, .replace-bar input').forEach(i => i.value = '');
       document.querySelectorAll('[data-biens]').forEach(c => filterTable(c.id));
     }
   }
