@@ -11,14 +11,14 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; background: var(--bg); color: #1a202c; }
 
-/* ===== INFOBULES : 9pt, fond bleu clair, à DROITE et légèrement en BAS du curseur ===== */
+/* ===== INFOBULES : 9pt, fond bleu clair, à DROITE et légèrement en BAS ===== */
 [data-tooltip] { position: relative; cursor: help; }
 [data-tooltip]:hover::after {
   content: attr(data-tooltip);
   position: absolute;
-  top: 10px;
+  top: 15px;
   left: 100%;
-  margin-left: 8px;
+  margin-left: 10px;
   background: #dbeafe;
   color: #1e3a8a;
   padding: 10px 14px;
@@ -39,9 +39,9 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; background:
 [data-tooltip]:hover::before {
   content: '';
   position: absolute;
-  top: 18px;
+  top: 20px;
   left: 100%;
-  margin-left: -2px;
+  margin-left: 2px;
   border: 8px solid transparent;
   border-right-color: #dbeafe;
   z-index: 10000;
@@ -98,7 +98,6 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
 .btn-info { background: var(--info); padding: 8px 16px; }
 .btn-export { background: #059669; padding: 6px 12px; }
 .btn-doublons { background: #dc2626; padding: 6px 12px; }
-.btn-message { background: #25d366; padding: 6px 12px; }
 .btn-whatsapp { background: #128c7e; padding: 6px 12px; }
 .btn-close-modal { background: #6b7280; padding: 8px 16px; }
 .btn:hover { opacity: 0.85; }
@@ -263,6 +262,26 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
 .empty-messages .icon { font-size: 48px; margin-bottom: 10px; }
 
 .notification-dot { display: inline-block; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; margin-left: 5px; }
+
+/* Notification de sauvegarde en série */
+.save-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--success);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 99998;
+  font-size: 13px;
+  font-weight: bold;
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+  from { transform: translateX(400px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
 </style>
 </head>
 <body>
@@ -344,8 +363,8 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-primary" onclick="saveNewBien()">💾 Enregistrer</button>
-      <button class="btn" style="background:#6b7280; color:white;" onclick="closeModal('addBienModal')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveNewBien()">💾 Enregistrer (modal reste ouvert)</button>
+      <button class="btn" style="background:#6b7280; color:white;" onclick="closeModal('addBienModal')">Fermer le modal</button>
     </div>
   </div>
 </div>
@@ -571,6 +590,14 @@ const SECRET_PASS_2 = 'ktibw';
 function isAdmin() { return DB.currentUser && DB.currentUser.type === 'Administrateur'; }
 function showLoading(text = 'Veuillez patienter...') { document.getElementById('loadingText').textContent = text; document.getElementById('loadingOverlay').classList.add('show'); }
 function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+
+function showSaveNotification(text) {
+  const notif = document.createElement('div');
+  notif.className = 'save-notification';
+  notif.textContent = text;
+  document.body.appendChild(notif);
+  setTimeout(() => { notif.style.opacity = '0'; setTimeout(() => notif.remove(), 300); }, 2000);
+}
 
 function updateStorageIndicator() {
   const size = JSON.stringify(DB).length;
@@ -2293,10 +2320,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// ===== MODIFIÉ : Le modal reste ouvert après enregistrement =====
 async function saveNewBien(force = false) {
   const codeMat = document.getElementById('codePreview').textContent;
   const free = document.getElementById('freeCodeMat').checked;
-  if (!free && (codeMat === '—' || !codeMat)) { alert('Veuillez compléter la saisie du Numéro.'); document.getElementById('newNumero').focus(); return; }
+  if (!free && (codeMat === '—' || !codeMat)) { alert('Veuillez compléter la saisie du Numéro (4 caractères).'); document.getElementById('newNumero').focus(); return; }
   const finalCode = free ? document.getElementById('newCodeMat').value : codeMat;
   if (!finalCode) { alert('Code matière invalide'); return; }
   if (!force && DB.biens.some(b => b['CODE MATIERE'] === finalCode)) { document.getElementById('duplicateWarning').style.display = 'block'; return; }
@@ -2314,12 +2342,15 @@ async function saveNewBien(force = false) {
     checked: false, reforme: false, source: 'saisie'
   };
   DB.biens.push(bien); await saveDB();
+  
   const keepDes = document.getElementById('keepDesignation').checked;
   const keepAnnee = document.getElementById('keepAnnee').checked;
   const keepEtat = document.getElementById('keepEtat').checked;
   const keepFormat = document.getElementById('keepFormat').checked;
   const keepBureau = document.getElementById('keepBureau').checked;
   const keepUtilisateur = document.getElementById('keepUtilisateur').checked;
+  
+  // Vider uniquement les champs non cochés
   if (!keepDes) { document.getElementById('newCodeMat').value = ''; document.getElementById('newCodeMat').readOnly = false; document.getElementById('newDesignation').value = ''; document.getElementById('newType').value = ''; }
   if (!keepEtat) document.getElementById('newEtat').value = '';
   if (!keepFormat) document.getElementById('newFormat').value = '';
@@ -2329,6 +2360,11 @@ async function saveNewBien(force = false) {
   document.getElementById('newNumero').value = '';
   document.getElementById('newDateInv').value = new Date().toISOString().split('T')[0];
   document.getElementById('duplicateWarning').style.display = 'none';
+  
+  // Notification visuelle
+  showSaveNotification(`✅ Bien enregistré ! Code: ${finalCode}`);
+  
+  // Replacer le focus pour la saisie suivante
   if (keepDes && keepAnnee) document.getElementById('newNumero').focus();
   else if (keepDes && !keepEtat) document.getElementById('newEtat').focus();
   else if (keepDes && keepEtat && !keepFormat) document.getElementById('newFormat').focus();
@@ -2336,8 +2372,9 @@ async function saveNewBien(force = false) {
   else if (keepDes && keepEtat && keepFormat && !keepBureau) document.getElementById('newBureau').focus();
   else if (keepDes && keepEtat && keepFormat && keepBureau && !keepUtilisateur) document.getElementById('newUtilisateur').focus();
   else document.getElementById('newNumero').focus();
+  
   updateCodePreview();
-  closeModal('addBienModal');
+  // ⚠️ Le modal NE SE FERME PAS - il reste ouvert pour de nouvelles saisies
   refreshCurrentView(true);
 }
 
