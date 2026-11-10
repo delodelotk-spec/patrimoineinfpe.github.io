@@ -11,38 +11,39 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; background: var(--bg); color: #1a202c; }
 
+/* ===== INFOBULES : 9pt, fond bleu clair, à DROITE et légèrement en BAS du curseur ===== */
 [data-tooltip] { position: relative; cursor: help; }
 [data-tooltip]:hover::after {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: 130%;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 10px;
+  left: 100%;
+  margin-left: 8px;
   background: #dbeafe;
   color: #1e3a8a;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-radius: 8px;
-  font-size: 13pt;
+  font-size: 9pt;
   white-space: pre-wrap;
   word-wrap: break-word;
   z-index: 10000;
   box-shadow: 0 6px 20px rgba(0,0,0,0.4);
   pointer-events: none;
   max-width: 600px;
-  min-width: 300px;
+  min-width: 280px;
   text-align: left;
-  line-height: 1.6;
+  line-height: 1.5;
   border: 2px solid #3b82f6;
   font-weight: 500;
 }
 [data-tooltip]:hover::before {
   content: '';
   position: absolute;
-  bottom: 120%;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 18px;
+  left: 100%;
+  margin-left: -2px;
   border: 8px solid transparent;
-  border-top-color: #dbeafe;
+  border-right-color: #dbeafe;
   z-index: 10000;
   pointer-events: none;
 }
@@ -199,6 +200,8 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
 .details-table th { background: var(--primary); color: white; padding: 8px 6px; border: 1px solid black; text-align: left; font-size: 11px; white-space: nowrap; }
 .details-table td { padding: 6px; border: 1px solid black; font-size: 11px; word-wrap: break-word; }
 .details-table tr:nth-child(even) { background: #f9fafb; }
+.details-table td.actions-cell { text-align: center; }
+.details-table td.actions-cell input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
 
 .synthese-cell { cursor: pointer; transition: background 0.2s; }
 .synthese-cell:hover { background: #bfdbfe !important; font-weight: bold; }
@@ -210,7 +213,6 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
 .password-verify-box input { width: 100%; padding: 8px; margin: 5px 0; border: 2px solid var(--primary); border-radius: 4px; font-size: 12px; }
 .password-error { color: var(--danger); font-weight: bold; margin-top: 10px; display: none; }
 
-/* ===== STYLES MESSAGES ===== */
 .messages-container { display: grid; grid-template-columns: 280px 1fr; gap: 15px; height: calc(100vh - 200px); }
 @media (max-width: 768px) { .messages-container { grid-template-columns: 1fr; height: auto; } }
 .messages-sidebar { background: white; border: 2px solid var(--primary); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; max-height: calc(100vh - 200px); }
@@ -298,7 +300,6 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
   <div id="contentArea"></div>
 </div>
 
-<!-- MODAL AJOUT BIEN -->
 <div class="modal-overlay" id="addBienModal">
   <div class="modal" style="width:950px;">
     <div class="modal-header"><h3>➕ Ajouter un nouveau bien</h3><button class="modal-close" onclick="closeModal('addBienModal')">×</button></div>
@@ -945,7 +946,6 @@ function renderDashboard() {
   setTimeout(() => { document.querySelectorAll('#dashChart .bar-fill').forEach(bar => { bar.style.height = bar.dataset.target + 'px'; }); }, 100);
 }
 
-// ===== DOUBLONS =====
 function detecterDoublons(direction) {
   const biens = DB.biens.filter(b => b.direction === direction && !b.reforme);
   const codeCounts = {};
@@ -1030,7 +1030,6 @@ async function executerSuppressionTousBiens(direction) {
   refreshCurrentView(false);
 }
 
-// ===== DÉTAILS =====
 function showDesignationDetails(designation, checkedStatus) {
   let biens = DB.biens.filter(b => b['DESIGNATION'] === designation && !b.reforme);
   if (checkedStatus === 'coches') biens = biens.filter(b => b.checked === true);
@@ -1041,9 +1040,9 @@ function showDesignationDetails(designation, checkedStatus) {
   let html = `<div style="margin-bottom:15px;"><p style="font-size:13px; color:#6b7280;"><b>Total : ${biens.length} bien(s)</b></p></div>
     <div class="table-wrapper" style="max-height:500px;">
       <table class="details-table">
-        <thead><tr><th>CODE MATIERE</th><th>DESIGNATION</th><th>MODELE</th><th>ETAT</th><th>FORMAT</th><th>ANNEE</th><th>SERVICE</th><th>UTILISATEUR</th><th>DIRECTION</th></tr></thead><tbody>`;
+        <thead><tr><th>CODE MATIERE</th><th>DESIGNATION</th><th>MODELE</th><th>ETAT</th><th>FORMAT</th><th>ANNEE</th><th>SERVICE</th><th>UTILISATEUR</th><th>DIRECTION</th><th>ACTIONS</th></tr></thead><tbody>`;
   biens.forEach(b => {
-    html += `<tr><td>${b['CODE MATIERE']||''}</td><td>${b['DESIGNATION']||''}</td><td>${b['TYPE/MODELE']||''}</td><td>${b['ETAT']||''}</td><td>${b['FORMAT']||''}</td><td>${b['ANNEE D\'ACQUISITION']||''}</td><td>${b['BUREAU/SERVICE']||''}</td><td>${b['UTILISATEUR']||''}</td><td>${b.direction||b['DIRECTION REGIONALE']||''}</td></tr>`;
+    html += `<tr><td>${b['CODE MATIERE']||''}</td><td>${b['DESIGNATION']||''}</td><td>${b['TYPE/MODELE']||''}</td><td>${b['ETAT']||''}</td><td>${b['FORMAT']||''}</td><td>${b['ANNEE D\'ACQUISITION']||''}</td><td>${b['BUREAU/SERVICE']||''}</td><td>${b['UTILISATEUR']||''}</td><td>${b.direction||b['DIRECTION REGIONALE']||''}</td><td class="actions-cell"><input type="checkbox" ${b.checked ? 'checked' : ''} onchange="toggleCheckFromDetails('${b.id}', this.checked)"></td></tr>`;
   });
   html += `</tbody></table></div>`;
   document.getElementById('detailsContent').innerHTML = html;
@@ -1057,16 +1056,23 @@ function showSyntheseDetails(code6) {
   let html = `<div style="margin-bottom:15px;"><p style="font-size:13px; color:#6b7280;"><b>Total : ${biens.length} bien(s)</b></p></div>
     <div class="table-wrapper" style="max-height:500px;">
       <table class="details-table">
-        <thead><tr><th>CODE MATIERE</th><th>DESIGNATION</th><th>MODELE</th><th>ETAT</th><th>FORMAT</th><th>ANNEE</th><th>SERVICE</th><th>UTILISATEUR</th><th>DIRECTION</th></tr></thead><tbody>`;
+        <thead><tr><th>CODE MATIERE</th><th>DESIGNATION</th><th>MODELE</th><th>ETAT</th><th>FORMAT</th><th>ANNEE</th><th>SERVICE</th><th>UTILISATEUR</th><th>DIRECTION</th><th>ACTIONS</th></tr></thead><tbody>`;
   biens.forEach(b => {
-    html += `<tr><td>${b['CODE MATIERE']||''}</td><td>${b['DESIGNATION']||''}</td><td>${b['TYPE/MODELE']||''}</td><td>${b['ETAT']||''}</td><td>${b['FORMAT']||''}</td><td>${b['ANNEE D\'ACQUISITION']||''}</td><td>${b['BUREAU/SERVICE']||''}</td><td>${b['UTILISATEUR']||''}</td><td>${b.direction||b['DIRECTION REGIONALE']||''}</td></tr>`;
+    html += `<tr><td>${b['CODE MATIERE']||''}</td><td>${b['DESIGNATION']||''}</td><td>${b['TYPE/MODELE']||''}</td><td>${b['ETAT']||''}</td><td>${b['FORMAT']||''}</td><td>${b['ANNEE D\'ACQUISITION']||''}</td><td>${b['BUREAU/SERVICE']||''}</td><td>${b['UTILISATEUR']||''}</td><td>${b.direction||b['DIRECTION REGIONALE']||''}</td><td class="actions-cell"><input type="checkbox" ${b.checked ? 'checked' : ''} onchange="toggleCheckFromDetails('${b.id}', this.checked)"></td></tr>`;
   });
   html += `</tbody></table></div>`;
   document.getElementById('detailsContent').innerHTML = html;
   openModal('detailsModal');
 }
 
-// ===== RÉSUMÉ =====
+async function toggleCheckFromDetails(bienId, checked) {
+  const bien = DB.biens.find(b => b.id === bienId);
+  if (!bien) return;
+  bien.checked = checked;
+  if (checked && !bien['DATE INVENTAIRE']) bien['DATE INVENTAIRE'] = new Date().toISOString().split('T')[0];
+  await saveDB();
+}
+
 function renderResume() {
   const content = document.getElementById('contentArea');
   const userDirs = DB.currentUser?.directions || DIRECTIONS;
@@ -1658,7 +1664,6 @@ function exportConfrontationAll() {
   downloadExcel(rows, 'Confrontation_Generale');
 }
 
-// ===== MESSAGES =====
 function renderMessages() {
   const content = document.getElementById('contentArea');
   content.innerHTML = `
@@ -1676,15 +1681,10 @@ function renderMessages() {
       <div class="messages-main">
         <div class="messages-main-header">
           <span id="messagesMainTitle">Sélectionnez un message</span>
-          <div>
-            <button class="btn btn-info" onclick="refreshMessagesList()">🔄 Actualiser</button>
-          </div>
+          <div><button class="btn btn-info" onclick="refreshMessagesList()">🔄 Actualiser</button></div>
         </div>
         <div class="messages-main-body" id="messagesMainBody">
-          <div class="empty-messages">
-            <div class="icon">💬</div>
-            <p>Sélectionnez un message pour afficher la conversation</p>
-          </div>
+          <div class="empty-messages"><div class="icon">💬</div><p>Sélectionnez un message pour afficher la conversation</p></div>
         </div>
         <div class="messages-main-footer" id="messagesMainFooter" style="display:none;">
           <div class="compose-form">
@@ -1705,16 +1705,13 @@ function refreshMessagesList() {
   if (!DB.currentUser) return;
   const list = document.getElementById('messagesList');
   if (!list) return;
-  
   const myMessages = DB.messages.filter(m => 
     m.to_user === '__all__' || m.to_user === DB.currentUser.username || m.from_user === DB.currentUser.username
   ).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  
   if (myMessages.length === 0) {
     list.innerHTML = '<div class="empty-messages" style="padding:20px;"><div class="icon">📭</div><p>Aucun message</p></div>';
     return;
   }
-  
   list.innerHTML = myMessages.map(m => {
     const isUnread = !m.read_by || !m.read_by.includes(DB.currentUser.username);
     const isToAll = m.to_user === '__all__';
@@ -1734,40 +1731,28 @@ function openMessageThread(messageId) {
   const message = DB.messages.find(m => m.id === messageId);
   if (!message) return;
   currentMessageThread = messageId;
-  
   if (!message.read_by) message.read_by = [];
   if (!message.read_by.includes(DB.currentUser.username)) {
     message.read_by.push(DB.currentUser.username);
     saveDB();
     refreshMessagesList();
   }
-  
   const body = document.getElementById('messagesMainBody');
   const footer = document.getElementById('messagesMainFooter');
   const title = document.getElementById('messagesMainTitle');
-  
   title.textContent = `📬 ${message.subject || '(Sans sujet)'}`;
   footer.style.display = 'block';
-  
   const conversation = getConversation(messageId);
-  
   body.innerHTML = conversation.map(msg => {
     const isSent = msg.from_user === DB.currentUser.username;
     const isPublic = msg.reply_type === 'public';
     const date = new Date(msg.timestamp).toLocaleString('fr-FR');
     let fileHtml = '';
-    if (msg.file_name) {
-      fileHtml = `<div class="msg-file">📎 <a href="#" onclick="downloadMessageFile('${msg.id}'); return false;">${msg.file_name}</a></div>`;
-    }
+    if (msg.file_name) fileHtml = `<div class="msg-file">📎 <a href="#" onclick="downloadMessageFile('${msg.id}'); return false;">${msg.file_name}</a></div>`;
     let replyIndicator = '';
-    if (msg.parent_id) {
-      replyIndicator = `<div style="font-size:10px; color:#6b7280; margin-bottom:4px;">↩️ ${isPublic ? 'Réponse publique' : 'Réponse privée'}</div>`;
-    }
-    // Bouton de suppression visible uniquement pour l'expéditeur
+    if (msg.parent_id) replyIndicator = `<div style="font-size:10px; color:#6b7280; margin-bottom:4px;">↩️ ${isPublic ? 'Réponse publique' : 'Réponse privée'}</div>`;
     let deleteBtn = '';
-    if (isSent) {
-      deleteBtn = `<button class="delete-msg-btn" onclick="deleteMessage('${msg.id}')" title="Supprimer ce message">🗑️</button>`;
-    }
+    if (isSent) deleteBtn = `<button class="delete-msg-btn" onclick="deleteMessage('${msg.id}')" title="Supprimer ce message">🗑️</button>`;
     return `<div class="message-thread">
       <div class="message-bubble ${isSent ? 'sent' : 'received'}">
         ${deleteBtn}
@@ -1776,34 +1761,23 @@ function openMessageThread(messageId) {
         <div class="msg-content">${msg.content || ''}</div>
         ${fileHtml}
         <div class="msg-meta">${date}</div>
-        <div class="reply-actions">
-          <button class="btn btn-info" onclick="openReplyModal('${msg.id}')">↩️ Répondre</button>
-        </div>
+        <div class="reply-actions"><button class="btn btn-info" onclick="openReplyModal('${msg.id}')">↩️ Répondre</button></div>
       </div>
     </div>`;
   }).join('');
-  
   body.scrollTop = body.scrollHeight;
   refreshMessagesList();
 }
 
-// ===== NOUVELLE FONCTION : SUPPRESSION DE MESSAGE PAR L'EXPÉDITEUR =====
 async function deleteMessage(messageId) {
   const msg = DB.messages.find(m => m.id === messageId);
   if (!msg) return;
-  
-  // Vérifier que l'utilisateur est bien l'expéditeur
   if (msg.from_user !== DB.currentUser.username) {
     alert('⛔ Vous ne pouvez supprimer que vos propres messages.');
     return;
   }
-  
   if (!confirm(`Voulez-vous vraiment supprimer ce message${msg.subject ? ' "' + msg.subject + '"' : ''} ?\n\nToutes les réponses associées seront également supprimées.`)) return;
-  
-  // Supprimer le message et toutes ses réponses (directes et indirectes)
   const idsToDelete = new Set([messageId]);
-  
-  // Trouver toutes les réponses (récursivement)
   let hasMore = true;
   while (hasMore) {
     hasMore = false;
@@ -1814,23 +1788,14 @@ async function deleteMessage(messageId) {
       }
     });
   }
-  
   DB.messages = DB.messages.filter(m => !idsToDelete.has(m.id));
-  
-  DB.actions.push({
-    date: new Date().toISOString(),
-    user: DB.currentUser.username,
-    action: `Suppression de message "${msg.subject || '(Sans sujet)'}" et ${idsToDelete.size - 1} réponse(s) associée(s)`
-  });
-  
+  DB.actions.push({ date: new Date().toISOString(), user: DB.currentUser.username, action: `Suppression de message "${msg.subject || '(Sans sujet)'}" et ${idsToDelete.size - 1} réponse(s)` });
   await saveDB();
   alert(`✅ Message et ${idsToDelete.size - 1} réponse(s) supprimé(s).`);
-  
-  // Si le message supprimé était le thread courant, revenir à la liste
   if (idsToDelete.has(currentMessageThread)) {
     currentMessageThread = null;
     document.getElementById('messagesMainTitle').textContent = 'Sélectionnez un message';
-    document.getElementById('messagesMainBody').innerHTML = '<div class="empty-messages"><div class="icon">💬</div><p>Sélectionnez un message pour afficher la conversation</p></div>';
+    document.getElementById('messagesMainBody').innerHTML = '<div class="empty-messages"><div class="icon">💬</div><p>Sélectionnez un message</p></div>';
     document.getElementById('messagesMainFooter').style.display = 'none';
   } else {
     openMessageThread(currentMessageThread);
@@ -1876,9 +1841,7 @@ document.addEventListener('change', function(e) {
         infoEl.textContent = `✅ ${file.name} (${(file.size/1024).toFixed(1)} Ko)`;
         infoEl.style.color = 'green';
       }
-    } else {
-      infoEl.textContent = '';
-    }
+    } else { infoEl.textContent = ''; }
   }
 });
 
@@ -1887,29 +1850,15 @@ async function sendMessage() {
   const subject = document.getElementById('msgSubject').value.trim();
   const content = document.getElementById('msgContent').value.trim();
   const fileInput = document.getElementById('msgFile');
-  
   if (!content && !fileInput.files[0]) { alert('Veuillez saisir un message ou joindre un fichier.'); return; }
-  
   let fileName = null, fileData = null;
-  if (fileInput.files[0]) {
-    fileName = fileInput.files[0].name;
-    fileData = await fileToBase64(fileInput.files[0]);
-  }
-  
+  if (fileInput.files[0]) { fileName = fileInput.files[0].name; fileData = await fileToBase64(fileInput.files[0]); }
   const message = {
     id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-    from_user: DB.currentUser.username,
-    to_user: to,
-    subject: subject,
-    content: content,
-    file_name: fileName,
-    file_data: fileData,
-    parent_id: null,
-    reply_type: null,
-    timestamp: new Date().toISOString(),
-    read_by: []
+    from_user: DB.currentUser.username, to_user: to, subject: subject, content: content,
+    file_name: fileName, file_data: fileData, parent_id: null, reply_type: null,
+    timestamp: new Date().toISOString(), read_by: []
   };
-  
   DB.messages.push(message);
   await saveDB();
   closeModal('composeMessageModal');
@@ -1922,29 +1871,16 @@ async function sendReply() {
   const replyType = document.getElementById('replyType').value;
   const content = document.getElementById('replyContent').value.trim();
   const fileInput = document.getElementById('replyFile');
-  
   if (!content && !fileInput.files[0]) { alert('Veuillez saisir une réponse ou joindre un fichier.'); return; }
-  
   let fileName = null, fileData = null;
-  if (fileInput.files[0]) {
-    fileName = fileInput.files[0].name;
-    fileData = await fileToBase64(fileInput.files[0]);
-  }
-  
+  if (fileInput.files[0]) { fileName = fileInput.files[0].name; fileData = await fileToBase64(fileInput.files[0]); }
   const reply = {
     id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-    from_user: DB.currentUser.username,
-    to_user: replyType === 'public' ? '__all__' : currentReplyToUser,
-    subject: 'Re: ' + (currentReplySubject || ''),
-    content: content,
-    file_name: fileName,
-    file_data: fileData,
-    parent_id: currentReplyParentId,
-    reply_type: replyType,
-    timestamp: new Date().toISOString(),
-    read_by: []
+    from_user: DB.currentUser.username, to_user: replyType === 'public' ? '__all__' : currentReplyToUser,
+    subject: 'Re: ' + (currentReplySubject || ''), content: content,
+    file_name: fileName, file_data: fileData, parent_id: currentReplyParentId, reply_type: replyType,
+    timestamp: new Date().toISOString(), read_by: []
   };
-  
   DB.messages.push(reply);
   await saveDB();
   closeModal('replyMessageModal');
@@ -1953,9 +1889,7 @@ async function sendReply() {
   buildTabs();
 }
 
-let currentReplyParentId = null;
-let currentReplyToUser = null;
-let currentReplySubject = null;
+let currentReplyParentId = null, currentReplyToUser = null, currentReplySubject = null;
 
 function openReplyModal(parentId) {
   const parent = DB.messages.find(m => m.id === parentId);
@@ -1963,12 +1897,7 @@ function openReplyModal(parentId) {
   currentReplyParentId = parentId;
   currentReplyToUser = parent.from_user;
   currentReplySubject = parent.subject;
-  
-  document.getElementById('replyOriginalMessage').innerHTML = `
-    <b>De:</b> ${parent.from_user}<br>
-    <b>Sujet:</b> ${parent.subject || '(Sans sujet)'}<br>
-    <b>Message:</b> ${parent.content || '(Fichier joint)'}
-  `;
+  document.getElementById('replyOriginalMessage').innerHTML = `<b>De:</b> ${parent.from_user}<br><b>Sujet:</b> ${parent.subject || '(Sans sujet)'}<br><b>Message:</b> ${parent.content || '(Fichier joint)'}`;
   document.getElementById('replyContent').value = '';
   document.getElementById('replyFile').value = '';
   document.getElementById('replyFileInfo').textContent = '';
@@ -1980,21 +1909,13 @@ function sendQuickReply(type) {
   if (!content) { alert('Veuillez saisir une réponse.'); return; }
   const parent = DB.messages.find(m => m.id === currentMessageThread);
   if (!parent) return;
-  
   const reply = {
     id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-    from_user: DB.currentUser.username,
-    to_user: type === 'public' ? '__all__' : parent.from_user,
-    subject: 'Re: ' + (parent.subject || ''),
-    content: content,
-    file_name: null,
-    file_data: null,
-    parent_id: parent.id,
-    reply_type: type,
-    timestamp: new Date().toISOString(),
-    read_by: []
+    from_user: DB.currentUser.username, to_user: type === 'public' ? '__all__' : parent.from_user,
+    subject: 'Re: ' + (parent.subject || ''), content: content,
+    file_name: null, file_data: null, parent_id: parent.id, reply_type: type,
+    timestamp: new Date().toISOString(), read_by: []
   };
-  
   DB.messages.push(reply);
   saveDB();
   document.getElementById('quickReplyContent').value = '';
@@ -2023,8 +1944,7 @@ function downloadMessageFile(messageId) {
 function openWhatsAppModal() {
   const content = document.getElementById('whatsappContent');
   if (DB.whatsappContacts.length === 0) {
-    content.innerHTML = `
-      <p style="margin-bottom:10px;">Aucun contact WhatsApp enregistré.</p>
+    content.innerHTML = `<p style="margin-bottom:10px;">Aucun contact WhatsApp enregistré.</p>
       <label>Ajouter un contact :</label>
       <div style="display:flex; gap:8px; margin-top:5px;">
         <input type="text" id="waName" placeholder="Nom" style="flex:1;">
@@ -2038,10 +1958,7 @@ function openWhatsAppModal() {
     <div class="whatsapp-list">
       ${DB.whatsappContacts.map((c, i) => `
         <div class="whatsapp-item">
-          <div>
-            <div class="wa-name">${c.name}</div>
-            <div class="wa-number">${c.number}</div>
-          </div>
+          <div><div class="wa-name">${c.name}</div><div class="wa-number">${c.number}</div></div>
           <div style="display:flex; gap:5px;">
             <a href="https://wa.me/${c.number.replace(/[^0-9]/g, '')}" target="_blank">💬 Ouvrir</a>
             <button class="btn btn-delete" onclick="removeWhatsAppContact(${i})">🗑️</button>
