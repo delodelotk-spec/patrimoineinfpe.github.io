@@ -276,7 +276,6 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
   to { transform: translateX(0); opacity: 1; }
 }
 
-/* Indicateur de mode saisie libre pour la désignation */
 .designation-libre-indicator {
   display: inline-block;
   padding: 3px 8px;
@@ -379,11 +378,11 @@ table.patrimoine-table tr:hover { background: #dbeafe; }
         <button class="btn btn-edit" onclick="forceSaveDuplicate()" style="margin-left:10px;">Enregistrer quand même (Bis)</button>
       </div>
       <div id="libreModeInfo" style="display:none; margin-top:10px; padding:10px; background:#fef3c7; border:2px solid var(--warning); border-radius:6px; font-size:11px; color:#92400e;">
-        💡 <b>Mode saisie libre activé :</b> Le champ Désignation est maintenant éditable. Vous pouvez saisir librement la désignation.
+        💡 <b>Mode saisie libre activé :</b> Le champ Désignation est maintenant éditable.
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-primary" onclick="saveNewBien()">💾 Enregistrer (modal reste ouvert)</button>
+      <button class="btn btn-primary" onclick="saveNewBien()">💾 Enregistrer et cocher (modal reste ouvert)</button>
       <button class="btn" style="background:#6b7280; color:white;" onclick="closeModal('addBienModal')">Fermer le modal</button>
     </div>
   </div>
@@ -2249,6 +2248,7 @@ function openAddBien(direction) {
   document.getElementById('newDesignation').value = '';
   document.getElementById('newDesignation').readOnly = true;
   document.getElementById('newDesignation').style.background = '#f3f4f6';
+  document.getElementById('newDesignation').style.border = '2px solid var(--primary)';
   document.getElementById('newType').value = '';
   document.getElementById('newQte').value = '1';
   document.getElementById('newEtat').value = '';
@@ -2274,7 +2274,6 @@ function openAddBien(direction) {
 
 function fillDatalist(id, items) { document.getElementById(id).innerHTML = (items || []).map(i => `<option value="${i}">`).join(''); }
 
-// ===== NOUVELLE FONCTION : Mise à jour de l'indicateur de mode =====
 function updateCodeMatModeIndicator(isLibre) {
   const indicator = document.getElementById('codeMatModeIndicator');
   if (!indicator) return;
@@ -2287,38 +2286,30 @@ function updateCodeMatModeIndicator(isLibre) {
   }
 }
 
-// ===== MODIFIÉ : Détection du suffixe ".99" pour activer la saisie libre =====
 function onCodeMatInput() {
   const v = document.getElementById('newCodeMat').value.toUpperCase();
   document.getElementById('newCodeMat').value = v;
   const free = document.getElementById('freeCodeMat').checked;
-  
-  // Détection du suffixe ".99" → mode saisie libre
   const endsWith99 = v.endsWith('.99');
   const designationField = document.getElementById('newDesignation');
   const libreModeInfo = document.getElementById('libreModeInfo');
   
-  if (!free && v.length > 6) document.getElementById('newCodeMat').value = v.substring(0, 6);
+  if (!free && v.length > 6 && !endsWith99) document.getElementById('newCodeMat').value = v.substring(0, 6);
   
-  // Si le code se termine par ".99" OU si la case "Libre" est cochée → saisie libre
   if (endsWith99 || free) {
-    // Mode saisie libre : désignation éditable
     designationField.readOnly = false;
     designationField.style.background = 'white';
     designationField.style.border = '2px solid #f59e0b';
     libreModeInfo.style.display = 'block';
     updateCodeMatModeIndicator(true);
     
-    // Si on vient de passer en mode libre (première détection de .99), focus sur désignation
     if (endsWith99 && v.length >= 3) {
-      // Ne pas vider la désignation si l'utilisateur a déjà commencé à la saisir
       if (designationField.value === '' || !designationField.dataset.userEdited) {
         designationField.value = '';
         designationField.focus();
       }
     }
   } else if (!free) {
-    // Mode automatique : désignation en lecture seule
     designationField.readOnly = true;
     designationField.style.background = '#f3f4f6';
     designationField.style.border = '2px solid var(--primary)';
@@ -2338,7 +2329,6 @@ function onCodeMatInput() {
   updateCodePreview();
 }
 
-// Marquer que l'utilisateur a modifié manuellement la désignation (en mode libre)
 document.addEventListener('input', function(e) {
   if (e.target.id === 'newDesignation') {
     e.target.dataset.userEdited = 'true';
@@ -2401,7 +2391,6 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (this.checked) {
         codeInput.removeAttribute('maxlength');
-        // Mode libre : désignation éditable
         designationField.readOnly = false;
         designationField.style.background = 'white';
         designationField.style.border = '2px solid #f59e0b';
@@ -2410,7 +2399,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         codeInput.setAttribute('maxlength', '6');
         if (codeInput.value.length > 6) codeInput.value = codeInput.value.substring(0, 6);
-        // Vérifier si le code se termine par ".99" pour garder le mode libre
         const endsWith99 = codeInput.value.toUpperCase().endsWith('.99');
         if (!endsWith99) {
           designationField.readOnly = true;
@@ -2425,12 +2413,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// ===== MODIFIÉ : Enregistrement + COCHAGE AUTOMATIQUE + modal reste ouvert =====
 async function saveNewBien(force = false) {
   const codeMat = document.getElementById('codePreview').textContent;
   const free = document.getElementById('freeCodeMat').checked;
   const endsWith99 = document.getElementById('newCodeMat').value.toUpperCase().endsWith('.99');
   
-  // En mode ".99" libre, on utilise directement le code matière saisi
   const finalCode = (free || endsWith99) ? document.getElementById('newCodeMat').value : codeMat;
   
   if (!finalCode || finalCode === '—') { 
@@ -2442,6 +2430,8 @@ async function saveNewBien(force = false) {
     document.getElementById('duplicateWarning').style.display = 'block'; 
     return; 
   }
+  
+  // ⭐ NOUVEAU : Le bien est créé avec checked: true (coché comme existant)
   const bien = {
     id: 'b_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
     direction: document.getElementById('newDirection').value,
@@ -2452,10 +2442,13 @@ async function saveNewBien(force = false) {
     'BUREAU/SERVICE': document.getElementById('newBureau').value,
     'UTILISATEUR': document.getElementById('newUtilisateur').value,
     'DIRECTION REGIONALE': document.getElementById('newDirection').value,
-    'DATE INVENTAIRE': document.getElementById('newDateInv').value,
-    checked: false, reforme: false, source: 'saisie'
+    'DATE INVENTAIRE': document.getElementById('newDateInv').value || new Date().toISOString().split('T')[0],
+    checked: true, // ⭐ COCHÉ AUTOMATIQUEMENT
+    reforme: false, 
+    source: 'saisie'
   };
-  DB.biens.push(bien); await saveDB();
+  DB.biens.push(bien); 
+  await saveDB();
   
   const keepDes = document.getElementById('keepDesignation').checked;
   const keepAnnee = document.getElementById('keepAnnee').checked;
@@ -2480,7 +2473,7 @@ async function saveNewBien(force = false) {
   document.getElementById('duplicateWarning').style.display = 'none';
   
   // Notification visuelle
-  showSaveNotification(`✅ Bien enregistré ! Code: ${finalCode}`);
+  showSaveNotification(`✅ Bien enregistré et COCHÉ ! Code: ${finalCode}`);
   
   // Replacer le focus pour la saisie suivante
   if (keepDes && keepAnnee) document.getElementById('newNumero').focus();
@@ -2492,7 +2485,7 @@ async function saveNewBien(force = false) {
   else document.getElementById('newNumero').focus();
   
   updateCodePreview();
-  // ⚠️ Le modal NE SE FERME PAS
+  // ⚠️ Le modal NE SE FERME PAS - il reste ouvert pour de nouvelles saisies
   refreshCurrentView(true);
 }
 
